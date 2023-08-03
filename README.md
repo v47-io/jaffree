@@ -19,7 +19,7 @@ distributed under the GNU General Public License Version 3.
 
 ## Tested with the help of [GitHub Actions](https://github.com/v47-io/jaffree/blob/master/.github/workflows/tests.yml) 
 
-![Tests](https://github.com/kokorin/Jaffree/workflows/Tests/badge.svg)
+![Tests](https://github.com/v47-io/jaffree/workflows/Tests/badge.svg)
 
 **OS**: Ubuntu, MacOS, Windows
 
