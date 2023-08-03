@@ -1,17 +1,25 @@
 [![SWUbanner](https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/banner-direct.svg)](https://github.com/vshymanskyy/StandWithUkraine/blob/main/docs/README.md)
 
-# Jaffree [![Sparkline](https://stars.medv.io/kokorin/Jaffree.svg)](https://stars.medv.io/kokorin/Jaffree)
+# Jaffree
 
 Jaffree stands for JAva FFmpeg and FFprobe FREE command line wrapper. Jaffree supports programmatic video production and consumption (with transparency)
 
 It integrates with ffmpeg via `java.lang.Process`.
 
+Fork of [Jaffree](https://github.com/kokorin/Jaffree)
+
 Inspired by [ffmpeg-cli-wrapper](https://github.com/bramp/ffmpeg-cli-wrapper)
 
-## Tested with the help of [GitHub Actions](https://github.com/kokorin/Jaffree/blob/master/.github/workflows/tests.yml) 
+## License
+
+All existing code previous to the fork remains available under the Apache License Version 2.
+
+All subsequent changes, entirely new code, and any artifacts based on this fork are licensed and 
+distributed under the GNU General Public License Version 3.
+
+## Tested with the help of [GitHub Actions](https://github.com/v47-io/jaffree/blob/master/.github/workflows/tests.yml) 
 
 ![Tests](https://github.com/kokorin/Jaffree/workflows/Tests/badge.svg)
-[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=kokorin_Jaffree&metric=coverage)](https://sonarcloud.io/dashboard?id=kokorin_Jaffree)
 
 **OS**: Ubuntu, MacOS, Windows
 
@@ -19,23 +27,13 @@ Inspired by [ffmpeg-cli-wrapper](https://github.com/bramp/ffmpeg-cli-wrapper)
 
 # Usage 
 
-[![Maven Central](https://img.shields.io/maven-central/v/com.github.kokorin.jaffree/jaffree.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22com.github.kokorin.jaffree%22%20AND%20a:%22jaffree%22)
+[![Maven Central](https://img.shields.io/maven-central/v/io.v47.jaffree/jaffree.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22io.v47.jaffree%22%20AND%20a:%22jaffree%22)
 
 ```xml
 <dependency>
-    <groupId>com.github.kokorin.jaffree</groupId>
+    <groupId>io.v47.jaffree</groupId>
     <artifactId>jaffree</artifactId>
     <version>${jaffree.version}</version>
-</dependency>
-
-<!--
-    You should also include slf4j into dependencies.
-    This is done intentionally to allow changing of slf4j version.
-  -->
-<dependency>
-    <groupId>org.slf4j</groupId>
-    <artifactId>slf4j-api</artifactId>
-    <version>1.7.25</version>
 </dependency>
 ```
 
@@ -546,6 +544,8 @@ FFmpegResult result = FFmpeg.atPath(BIN)
 
 Jaffree allows simultaneous reading from several sources (with one instance per every source and target).
 You can find details in  Mosaic [example](src/test/java/examples/MosaicExample.java).
+
+# OBSOLETE README CONTENT
 
 # Build & configuration
 

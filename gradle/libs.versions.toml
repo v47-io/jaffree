@@ -1,0 +1,19 @@
+[versions]
+commons-io = "2.11.0"
+junit = "4.13.2"
+license = "0.6.1"
+logback = "1.2.10"
+maven-publish-ossrh = "1.5.0"
+nanojson = "1.7"
+slf4j = "1.7.32"
+
+[libraries]
+commonsIo = { module = "commons-io:commons-io", version.ref = "commons-io" }
+junit = { module = "junit:junit", version.ref = "junit" }
+logback = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
+nanojson = { module = "com.grack:nanojson", version.ref = "nanojson" }
+slf4j = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
+
+[plugins]
+license = { id = "org.cadixdev.licenser", version.ref = "license" }
+mavenPublishOssrh = { id = "name.remal.maven-publish-ossrh", version.ref = "maven-publish-ossrh" }
