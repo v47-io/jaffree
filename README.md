@@ -23,7 +23,7 @@ distributed under the GNU General Public License Version 3.
 
 **OS**: Ubuntu, MacOS, Windows
 
-**JDK**: 8, 11, 17
+**JDK**: 17 (and soon 21)
 
 # Usage 
 
