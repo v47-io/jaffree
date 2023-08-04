@@ -26,7 +26,6 @@ jobs:
 
       - name: Setup FFmpeg (${{ runner.os }})
         uses: FedericoCarboni/setup-ffmpeg@v2
-        id: setup-ffmpeg-${{ runner.os }}
 
       - name: Build and test using gradle
         uses: burrunan/gradle-cache-action@v1
