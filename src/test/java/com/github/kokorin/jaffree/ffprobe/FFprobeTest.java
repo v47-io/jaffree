@@ -4,59 +4,59 @@ import com.github.kokorin.jaffree.Artifacts;
 import com.github.kokorin.jaffree.Config;
 import com.github.kokorin.jaffree.LogLevel;
 import com.github.kokorin.jaffree.Rational;
-import com.github.kokorin.jaffree.StackTraceMatcher;
 import com.github.kokorin.jaffree.StreamType;
 import com.github.kokorin.jaffree.ffprobe.data.FlatFormatParser;
 import com.github.kokorin.jaffree.ffprobe.data.FormatParser;
 import com.github.kokorin.jaffree.ffprobe.data.JsonFormatParser;
 import com.github.kokorin.jaffree.process.JaffreeAbnormalExitException;
-import org.junit.Assert;
-import org.junit.Ignore;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.InputStream;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.nio.channels.SeekableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.IsCollectionContaining.hasItems;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
-@RunWith(Parameterized.class)
 public class FFprobeTest {
-    private final FormatParser formatParser;
+    private static FlatFormatParser flatFormatParser = new FlatFormatParser();
+    private static JsonFormatParser jsonFormatParser = new JsonFormatParser();
 
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
-
-    @Parameterized.Parameters(name = "{0}")
-    public static Iterable<? extends Object> data() {
-        return Arrays.asList(new FlatFormatParser(), new JsonFormatParser());
+    static java.util.stream.Stream<Arguments> parserImplementations() {
+        return java.util.stream.Stream.of(
+                Arguments.of(flatFormatParser),
+                Arguments.of(jsonFormatParser)
+        );
     }
 
-    public FFprobeTest(FormatParser formatParser) {
-        this.formatParser = formatParser;
+    @ParameterizedTest
+    @MethodSource("parserImplementations")
+    @Retention(RetentionPolicy.RUNTIME)
+    private @interface TestAllParsers {
     }
 
     //private boolean showData;
 
-    @Test
-    public void testShowDataWithShowStreams() throws Exception {
+
+    @TestAllParsers
+    public void testShowDataWithShowStreams(FormatParser formatParser) throws Exception {
         FFprobeResult result = FFprobe.atPath(Config.FFMPEG_BIN)
                 .setInput(Artifacts.VIDEO_MP4)
                 .setShowData(true)
@@ -74,8 +74,9 @@ public class FFprobeTest {
     }
 
     // For this test to pass ffmpeg must be added to Operation System PATH environment variable
-    @Test
-    public void testEnvPath() throws Exception {
+
+    @TestAllParsers
+    public void testEnvPath(FormatParser formatParser) throws Exception {
         FFprobeResult result = FFprobe.atPath()
                 .setInput(Artifacts.VIDEO_MP4)
                 .setFormatParser(formatParser)
@@ -84,8 +85,9 @@ public class FFprobeTest {
         assertNotNull(result);
     }
 
-    @Test
-    public void testShowDataWithShowPackets() throws Exception {
+
+    @TestAllParsers
+    public void testShowDataWithShowPackets(FormatParser formatParser) throws Exception {
         FFprobeResult result = FFprobe.atPath(Config.FFMPEG_BIN)
                 .setInput(Artifacts.VIDEO_MP4)
                 .setShowData(true)
@@ -105,8 +107,9 @@ public class FFprobeTest {
 
     //private String showDataHash;
 
-    @Test
-    public void testShowDataHashWithShowStreams() throws Exception {
+
+    @TestAllParsers
+    public void testShowDataHashWithShowStreams(FormatParser formatParser) throws Exception {
         FFprobeResult result = FFprobe.atPath(Config.FFMPEG_BIN)
                 .setInput(Artifacts.VIDEO_MP4)
                 .setShowDataHash("MD5")
@@ -120,8 +123,9 @@ public class FFprobeTest {
         assertNotNull(result.getStreams().get(0).getExtradataHash());
     }
 
-    @Test
-    public void testShowDataHashWithShowPackets() throws Exception {
+
+    @TestAllParsers
+    public void testShowDataHashWithShowPackets(FormatParser formatParser) throws Exception {
         FFprobeResult result = FFprobe.atPath(Config.FFMPEG_BIN)
                 .setInput(Artifacts.VIDEO_MP4)
                 .setShowDataHash("MD5")
@@ -140,8 +144,9 @@ public class FFprobeTest {
 
     //private boolean showFormat;
 
-    @Test
-    public void testShowFormat() throws Exception {
+
+    @TestAllParsers
+    public void testShowFormat(FormatParser formatParser) throws Exception {
         FFprobeResult result = FFprobe.atPath(Config.FFMPEG_BIN)
                 .setInput(Artifacts.VIDEO_MP4)
                 .setShowFormat(true)
@@ -172,8 +177,9 @@ public class FFprobeTest {
     //private String showFormatEntry;
     //private String showEntries;
 
-    @Test
-    public void testShowEntries() throws Exception {
+
+    @TestAllParsers
+    public void testShowEntries(FormatParser formatParser) throws Exception {
 
         FFprobeResult result = FFprobe.atPath(Config.FFMPEG_BIN)
                 .setInput(Artifacts.VIDEO_MP4)
@@ -199,9 +205,10 @@ public class FFprobeTest {
 
     //private boolean showFrames;
 
-    @Test
-    @Ignore("fails when run against ffmpeg/ffprobe 5.0")
-    public void testShowFrames() throws Exception {
+
+    @Disabled("fails when run against ffmpeg/ffprobe 5.0")
+    @TestAllParsers
+    public void testShowFrames(FormatParser formatParser) throws Exception {
         FFprobeResult result = FFprobe.atPath(Config.FFMPEG_BIN)
                 .setInput(Artifacts.VIDEO_WITH_SUBTITLES)
                 .setShowFrames(true)
@@ -244,13 +251,15 @@ public class FFprobeTest {
             }
         }
 
-        assertThat(streamTypes, hasItems(StreamType.VIDEO, StreamType.AUDIO, StreamType.SUBTITLE));
+        assertTrue(streamTypes.containsAll(
+                List.of(StreamType.VIDEO, StreamType.AUDIO, StreamType.SUBTITLE)));
     }
 
     //private LogLevel showLog;
 
-    @Test
-    public void testShowLog() throws Exception {
+
+    @TestAllParsers
+    public void testShowLog(FormatParser formatParser) throws Exception {
         FFprobeResult result = FFprobe.atPath(Config.FFMPEG_BIN)
                 .setInput(Artifacts.VIDEO_MP4)
                 .setShowFrames(true)
@@ -264,7 +273,7 @@ public class FFprobeTest {
 
         int framesWithLogs = 0;
         for (FrameSubtitle frameSubtitle : result.getFrames()) {
-            Assert.assertTrue(frameSubtitle instanceof Frame);
+            Assertions.assertTrue(frameSubtitle instanceof Frame);
             Frame frame = (Frame) frameSubtitle;
 
             if (frame.getLogs() != null && !frame.getLogs().isEmpty()) {
@@ -283,8 +292,9 @@ public class FFprobeTest {
 
     //private boolean showStreams;
 
-    @Test
-    public void testShowStreams() throws Exception {
+
+    @TestAllParsers
+    public void testShowStreams(FormatParser formatParser) throws Exception {
         FFprobeResult result = FFprobe.atPath(Config.FFMPEG_BIN)
                 .setInput(Artifacts.VIDEO_MP4)
                 .setShowStreams(true)
@@ -348,8 +358,9 @@ public class FFprobeTest {
         assertEquals(Boolean.FALSE, disposition.getTimedThumbnails());
     }
 
-    @Test
-    public void testSelectStreamWithShowStreams() throws Exception {
+
+    @TestAllParsers
+    public void testSelectStreamWithShowStreams(FormatParser formatParser) throws Exception {
         FFprobeResult result = FFprobe.atPath(Config.FFMPEG_BIN)
                 .setInput(Artifacts.VIDEO_MP4)
                 .setShowStreams(true)
@@ -365,8 +376,9 @@ public class FFprobeTest {
         assertEquals(StreamType.VIDEO, stream.getCodecType());
     }
 
-    @Test
-    public void testSelectStreamWithShowPackets() throws Exception {
+
+    @TestAllParsers
+    public void testSelectStreamWithShowPackets(FormatParser formatParser) throws Exception {
         FFprobeResult result = FFprobe.atPath(Config.FFMPEG_BIN)
                 .setInput(Artifacts.VIDEO_MP4)
                 .setShowPackets(true)
@@ -382,9 +394,10 @@ public class FFprobeTest {
 
     //private boolean showPrograms;
 
-    @Test
-    @Ignore("fails when run against ffmpeg/ffprobe 5.0")
-    public void testShowPrograms() throws Exception {
+
+    @Disabled("fails when run against ffmpeg/ffprobe 5.0")
+    @TestAllParsers
+    public void testShowPrograms(FormatParser formatParser) throws Exception {
         FFprobeResult result = FFprobe.atPath(Config.FFMPEG_BIN)
                 .setInput(Artifacts.VIDEO_WITH_PROGRAMS)
                 .setShowPrograms(true)
@@ -426,8 +439,9 @@ public class FFprobeTest {
 
     //private boolean showChapters;
 
-    @Test
-    public void testShowChapters() throws Exception {
+
+    @TestAllParsers
+    public void testShowChapters(FormatParser formatParser) throws Exception {
         FFprobeResult result = FFprobe.atPath(Config.FFMPEG_BIN)
                 .setInput(Artifacts.VIDEO_WITH_CHAPTERS)
                 .setShowChapters(true)
@@ -461,8 +475,9 @@ public class FFprobeTest {
     //private boolean countFrames;
     //private boolean countPackets;
 
-    @Test
-    public void testCountFramesAndPackets() throws Exception {
+
+    @TestAllParsers
+    public void testCountFramesAndPackets(FormatParser formatParser) throws Exception {
         FFprobeResult result = FFprobe.atPath(Config.FFMPEG_BIN)
                 .setInput(Artifacts.VIDEO_MP4)
                 .setShowStreams(true)
@@ -482,8 +497,9 @@ public class FFprobeTest {
 
     //private String readIntervals;
 
-    @Test
-    public void testReadIntervals() throws Exception {
+
+    @TestAllParsers
+    public void testReadIntervals(FormatParser formatParser) throws Exception {
         FFprobeResult result = FFprobe.atPath(Config.FFMPEG_BIN)
                 .setInput(Artifacts.VIDEO_MP4)
                 .setShowPackets(true)
@@ -499,9 +515,10 @@ public class FFprobeTest {
         }
     }
 
-    @Test
-    @Ignore("fails when run against ffmpeg/ffprobe 5.0")
-    public void testShowPacketsAndFrames() {
+
+    @Disabled("fails when run against ffmpeg/ffprobe 5.0")
+    @TestAllParsers
+    public void testShowPacketsAndFrames(FormatParser formatParser) {
         FFprobeResult result = FFprobe.atPath(Config.FFMPEG_BIN)
                 .setInput(Artifacts.VIDEO_WITH_SUBTITLES)
                 .setShowPackets(true)
@@ -589,11 +606,12 @@ public class FFprobeTest {
             fail("Unexpected type: " + pfs);
         }
 
-        assertThat(resultClasses, hasItems(Packet.class, Frame.class, Subtitle.class));
+        assertTrue(resultClasses.containsAll(List.of(Packet.class, Frame.class, Subtitle.class)));
     }
 
-    @Test
-    public void testStreamSideDataListAttributes() throws Exception {
+
+    @TestAllParsers
+    public void testStreamSideDataListAttributes(FormatParser formatParser) throws Exception {
         FFprobeResult result;
         try (InputStream rotatedInput = FFprobeTest.class.getResourceAsStream("rotated.mp4")) {
             assertNotNull(rotatedInput);
@@ -622,9 +640,10 @@ public class FFprobeTest {
         assertNotNull(sideData.getRotation());
     }
 
-    @Test
-    @Ignore("ffprobe 4.4 doesn't output frame side data")
-    public void testFrameSideDataListAttributes() throws Exception {
+
+    @Disabled("ffprobe 4.4 doesn't output frame side data")
+    @TestAllParsers
+    public void testFrameSideDataListAttributes(FormatParser formatParser) throws Exception {
         FFprobeResult result = FFprobe.atPath(Config.FFMPEG_BIN)
                 .setInput(Artifacts.VIDEO_MJPEG)
                 .setShowFrames(true)
@@ -632,9 +651,9 @@ public class FFprobeTest {
                 .setFormatParser(formatParser)
                 .execute();
 
-        assertNotNull("Null result", result);
-        assertNotNull("Null frames", result.getFrames());
-        assertFalse("No frames", result.getFrames().isEmpty());
+        assertNotNull(result, "Null result");
+        assertNotNull(result.getFrames(), "Null frames");
+        assertFalse(result.getFrames().isEmpty(), "No frames");
 
         int sideDataCount = 0;
         for (FrameSubtitle frameSubtitle : result.getFrames()) {
@@ -651,11 +670,12 @@ public class FFprobeTest {
             }
         }
 
-        assertTrue("No Side Data", sideDataCount > 0);
+        assertTrue(sideDataCount > 0, "No Side Data");
     }
 
-    @Test
-    public void testPacketSideDataListAttributes() throws Exception {
+
+    @TestAllParsers
+    public void testPacketSideDataListAttributes(FormatParser formatParser) throws Exception {
         FFprobeResult result = FFprobe.atPath(Config.FFMPEG_BIN)
                 .setInput(Artifacts.AUDIO_OPUS)
                 .setShowPackets(true)
@@ -684,25 +704,30 @@ public class FFprobeTest {
         assertTrue(sideDataCount >= 1);
     }
 
-    @Test
-    public void testExceptionIsThrownIfFfprobeExitsWithError() {
+
+    @TestAllParsers
+    public void testExceptionIsThrownIfFfprobeExitsWithError(FormatParser formatParser) {
         try {
             FFprobe.atPath(Config.FFMPEG_BIN)
-                .setInput(Paths.get("nonexistent.mp4"))
-                .setFormatParser(formatParser)
-                .execute();
+                    .setInput(Paths.get("nonexistent.mp4"))
+                    .setFormatParser(formatParser)
+                    .execute();
         } catch (JaffreeAbnormalExitException e) {
-            assertEquals("Process execution has ended with non-zero status: 1. Check logs for detailed error message.", e.getMessage());
+            assertEquals(
+                    "Process execution has ended with non-zero status: 1. Check logs for detailed error message.",
+                    e.getMessage());
             assertEquals(1, e.getProcessErrorLogMessages().size());
-            assertEquals("[error] nonexistent.mp4: No such file or directory", e.getProcessErrorLogMessages().get(0).message);
+            assertEquals("[error] nonexistent.mp4: No such file or directory",
+                    e.getProcessErrorLogMessages().get(0).message);
             return;
         }
 
         fail("JaffreeAbnormalExitException should have been thrown!");
     }
 
-    @Test
-    public void testProbeSize() throws Exception {
+
+    @TestAllParsers
+    public void testProbeSize(FormatParser formatParser) throws Exception {
         FFprobeResult result = FFprobe.atPath(Config.FFMPEG_BIN)
                 .setShowStreams(true)
                 .setProbeSize(10_000_000L)
@@ -715,8 +740,9 @@ public class FFprobeTest {
         assertFalse(result.getStreams().isEmpty());
     }
 
-    @Test
-    public void testAnalyzeDuration() throws Exception {
+
+    @TestAllParsers
+    public void testAnalyzeDuration(FormatParser formatParser) throws Exception {
         FFprobeResult result = FFprobe.atPath(Config.FFMPEG_BIN)
                 .setShowStreams(true)
                 .setAnalyzeDuration(10_000_000L)
@@ -729,8 +755,9 @@ public class FFprobeTest {
         assertFalse(result.getStreams().isEmpty());
     }
 
-    @Test
-    public void testAnalyzeDuration2() throws Exception {
+
+    @TestAllParsers
+    public void testAnalyzeDuration2(FormatParser formatParser) throws Exception {
         FFprobeResult result = FFprobe.atPath(Config.FFMPEG_BIN)
                 .setShowStreams(true)
                 .setAnalyzeDuration(10, TimeUnit.SECONDS)
@@ -743,8 +770,9 @@ public class FFprobeTest {
         assertFalse(result.getStreams().isEmpty());
     }
 
-    @Test
-    public void testFpsProbeSize() throws Exception {
+
+    @TestAllParsers
+    public void testFpsProbeSize(FormatParser formatParser) throws Exception {
         FFprobeResult result = FFprobe.atPath(Config.FFMPEG_BIN)
                 .setShowStreams(true)
                 .setFpsProbeSize(100L)
@@ -757,8 +785,9 @@ public class FFprobeTest {
         assertFalse(result.getStreams().isEmpty());
     }
 
-    @Test
-    public void testAdditionalArguments() {
+
+    @TestAllParsers
+    public void testAdditionalArguments(FormatParser formatParser) {
         FFprobeResult result = FFprobe.atPath(Config.FFMPEG_BIN)
                 // The same as .setShowStreams(true), just for testing
                 .addArgument("-show_streams")
@@ -776,8 +805,9 @@ public class FFprobeTest {
         assertEquals(StreamType.VIDEO, stream.getCodecType());
     }
 
-    @Test
-    public void testInputStream() throws Exception {
+
+    @TestAllParsers
+    public void testInputStream(FormatParser formatParser) throws Exception {
         FFprobeResult result;
 
         try (InputStream inputStream = Files
@@ -794,8 +824,9 @@ public class FFprobeTest {
         assertFalse(result.getStreams().isEmpty());
     }
 
-    @Test
-    public void testInputChannel() throws Exception {
+
+    @TestAllParsers
+    public void testInputChannel(FormatParser formatParser) throws Exception {
         FFprobeResult result;
 
         try (SeekableByteChannel channel = Files
@@ -812,8 +843,9 @@ public class FFprobeTest {
         assertFalse(result.getStreams().isEmpty());
     }
 
-    @Test
-    public void testAsyncExecution() throws Exception {
+
+    @TestAllParsers
+    public void testAsyncExecution(FormatParser formatParser) throws Exception {
         FFprobeResult result = FFprobe.atPath(Config.FFMPEG_BIN)
                 .setShowStreams(true)
                 .setInput(Artifacts.VIDEO_MP4)
@@ -833,17 +865,17 @@ public class FFprobeTest {
     }
 
 
-    @Test
-    public void testAsyncExecutionWithException() throws Exception {
-        expectedException.expect(
-                new StackTraceMatcher("Process execution has ended with non-zero status")
-        );
+    @TestAllParsers
+    public void testAsyncExecutionWithException(FormatParser formatParser) throws Exception {
+        var exception = Assertions.assertThrows(ExecutionException.class,
+                () -> FFprobe.atPath(Config.FFMPEG_BIN)
+                        .setShowStreams(true)
+                        .setInput("non_existent.mp4")
+                        .setFormatParser(formatParser)
+                        .executeAsync()
+                        .get());
 
-        FFprobeResult result = FFprobe.atPath(Config.FFMPEG_BIN)
-                .setShowStreams(true)
-                .setInput("non_existent.mp4")
-                .setFormatParser(formatParser)
-                .executeAsync()
-                .get();
+        Assertions.assertTrue(exception.getMessage()
+                .contains("Process execution has ended with non-zero status: 1"));
     }
 }

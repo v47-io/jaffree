@@ -1,16 +1,12 @@
 package com.github.kokorin.jaffree;
 
-import org.hamcrest.BaseMatcher;
-import org.hamcrest.Description;
-
-public class StackTraceMatcher extends BaseMatcher<Object> {
+public class StackTraceMatcher {
     private final String messagePart;
 
     public StackTraceMatcher(String messagePart) {
         this.messagePart = messagePart;
     }
 
-    @Override
     public boolean matches(Object item) {
         if (!(item instanceof Throwable)) {
             return false;
@@ -33,10 +29,5 @@ public class StackTraceMatcher extends BaseMatcher<Object> {
         }
 
         return false;
-    }
-
-    @Override
-    public void describeTo(Description description) {
-        description.appendText("message of any exception in the stacktrace to contain: " + messagePart);
     }
 }

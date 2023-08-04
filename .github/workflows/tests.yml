@@ -12,6 +12,9 @@ on:
     branches:
       - master
 
+permissions:
+  checks: write
+
 jobs:
   tests:
 
@@ -19,6 +22,7 @@ jobs:
     strategy:
       matrix:
         os: [ ubuntu-latest, macos-latest, windows-latest ]
+        java-version: [ 17 ]
       fail-fast: false
 
     steps:
@@ -28,7 +32,7 @@ jobs:
         uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
-          java-version: 17
+          java-version: ${{ matrix.java-version }}
 
       - name: Cache Test Artifacts
         uses: actions/cache@v3

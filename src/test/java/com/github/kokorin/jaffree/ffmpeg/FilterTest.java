@@ -1,7 +1,7 @@
 package com.github.kokorin.jaffree.ffmpeg;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class FilterTest {
     @Test
@@ -13,7 +13,7 @@ public class FilterTest {
                 .setName("amerge")
                 .getValue();
 
-        Assert.assertEquals(expected, actual);
+        Assertions.assertEquals(expected, actual);
     }
 
     @Test
@@ -28,18 +28,19 @@ public class FilterTest {
                 .addArgument("r", "10")
                 .getValue();
 
-        Assert.assertEquals(expected, actual);
+        Assertions.assertEquals(expected, actual);
     }
 
     @Test
     public void testEscape() throws Exception {
-        Assert.assertEquals("\\\\", GenericFilter.escape("\\"));
-        Assert.assertEquals("\\\\\\'", GenericFilter.escape("'"));
-        Assert.assertEquals("\\\\:", GenericFilter.escape(":"));
+        Assertions.assertEquals("\\\\", GenericFilter.escape("\\"));
+        Assertions.assertEquals("\\\\\\'", GenericFilter.escape("'"));
+        Assertions.assertEquals("\\\\:", GenericFilter.escape(":"));
 
         String text = "this is a 'string': may contain one, or more, special characters";
-        String expected = "this is a \\\\\\'string\\\\\\'\\\\: may contain one\\, or more\\, special characters";
-        Assert.assertEquals(expected, GenericFilter.escape(text));
+        String expected =
+                "this is a \\\\\\'string\\\\\\'\\\\: may contain one\\, or more\\, special characters";
+        Assertions.assertEquals(expected, GenericFilter.escape(text));
     }
 
 }

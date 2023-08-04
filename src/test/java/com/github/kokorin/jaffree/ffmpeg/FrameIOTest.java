@@ -2,27 +2,20 @@ package com.github.kokorin.jaffree.ffmpeg;
 
 import com.github.kokorin.jaffree.Artifacts;
 import com.github.kokorin.jaffree.Config;
-import com.github.kokorin.jaffree.StackTraceMatcher;
+import com.github.kokorin.jaffree.JaffreeException;
 import com.github.kokorin.jaffree.StreamType;
 import com.github.kokorin.jaffree.ffprobe.FFprobe;
 import com.github.kokorin.jaffree.ffprobe.FFprobeResult;
 import org.apache.commons.io.output.NullOutputStream;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.FontMetrics;
-import java.awt.Graphics2D;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -30,18 +23,15 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class FrameIOTest {
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
-
     private static final Logger LOGGER = LoggerFactory.getLogger(FrameIOTest.class);
 
     @Test
-    public void countFrames() throws Exception {
+    public void countFrames() {
         final AtomicLong trackCounter = new AtomicLong();
         final AtomicLong frameCounter = new AtomicLong();
         FrameConsumer consumer = new FrameConsumer() {
@@ -75,14 +65,13 @@ public class FrameIOTest {
                 )
                 .execute();
 
-        Assert.assertNotNull(result);
+        Assertions.assertNotNull(result);
         assertEquals(1, trackCounter.get());
         assertEquals(42L, frameCounter.get());
     }
 
     @Test
-    public void testStreamId() throws Exception {
-        expectedException.expect(new StackTraceMatcher("Stream ids must start with 0 and increase by 1 subsequently"));
+    public void testStreamId() {
 
         FrameProducer producer = new FrameProducer() {
 
@@ -104,7 +93,12 @@ public class FrameIOTest {
         };
 
         NutFrameWriter writer = new NutFrameWriter(producer, ImageFormats.BGR24, 200);
-        writer.write(new NullOutputStream());
+
+        var exception = Assertions.assertThrows(JaffreeException.class,
+                () -> writer.write(new NullOutputStream()));
+
+        assertTrue(exception.getMessage()
+                .contains("Stream ids must start with 0 and increase by 1 subsequently"));
     }
 
     @Test
@@ -189,7 +183,7 @@ public class FrameIOTest {
                 )
                 .execute();
 
-        Assert.assertNotNull(result);
+        Assertions.assertNotNull(result);
 
         FFprobeResult probe = FFprobe.atPath(Config.FFMPEG_BIN)
                 .setInput(output)
@@ -304,15 +298,16 @@ public class FrameIOTest {
                             assertEquals(BufferedImage.TYPE_3BYTE_BGR, image.getType());
 
                             assertEquals(Color.WHITE, new Color(image.getRGB(1, 1)));
-                            assertEquals(Color.BLUE, new Color(image.getRGB(width / 2, height / 2)));
+                            assertEquals(Color.BLUE,
+                                    new Color(image.getRGB(width / 2, height / 2)));
                             assertEquals(Color.RED, new Color(image.getRGB(width - 1, height - 1)));
 
                             // fully compare every 10 frames to speed up test
                             if (videoCounter.get() % 10 == 0) {
                                 for (int x = 0; x < width; x++) {
                                     for (int y = 0; y < height; y++) {
-                                        assertEquals("x: " + x + ", y: " + y,
-                                                flag.getRGB(x, y), image.getRGB(x, y));
+                                        assertEquals(flag.getRGB(x, y),
+                                                image.getRGB(x, y), "x: " + x + ", y: " + y);
                                     }
                                 }
                             }
@@ -331,8 +326,8 @@ public class FrameIOTest {
         // total number of frames can differ from expected
         int expectedFrames = fps * duration;
         int actualFrames = videoCounter.get();
-        assertTrue("expected: " + expectedFrames + ", actual: " + actualFrames,
-                expectedFrames == actualFrames || expectedFrames + 1 == actualFrames);
+        assertTrue(expectedFrames == actualFrames || expectedFrames + 1 == actualFrames,
+                "expected: " + expectedFrames + ", actual: " + actualFrames);
         // total number of samples can differ in output file, assert the difference is less then 1%
         assertEquals(1., 1. * (sampleRate * duration) / sampleCounter.get(), 0.01);
     }
@@ -446,8 +441,8 @@ public class FrameIOTest {
                             if (videoCounter.get() % 10 == 0) {
                                 for (int x = 0; x < width; x++) {
                                     for (int y = 0; y < height; y++) {
-                                        assertEquals("x: " + x + ", y: " + y,
-                                                redCross.getRGB(x, y), image.getRGB(x, y));
+                                        assertEquals(redCross.getRGB(x, y),
+                                                image.getRGB(x, y), "x: " + x + ", y: " + y);
                                     }
                                 }
                             }
@@ -467,8 +462,8 @@ public class FrameIOTest {
         // total number of frames can differ from expected
         int expectedFrames = fps * duration;
         int actualFrames = videoCounter.get();
-        assertTrue("expected: " + expectedFrames + ", actual: " + actualFrames,
-                expectedFrames == actualFrames || expectedFrames + 1 == actualFrames);
+        assertTrue(expectedFrames == actualFrames || expectedFrames + 1 == actualFrames,
+                "expected: " + expectedFrames + ", actual: " + actualFrames);
         // total number of samples can differ in output file, assert the difference is less then 1%
         assertEquals(1., 1. * (sampleRate * duration) / sampleCounter.get(), 0.01);
     }
@@ -480,7 +475,9 @@ public class FrameIOTest {
         testNutGenerationAndConsumption(10, 25, 1000, 2560, 1440);
     }
 
-    private void testNutGenerationAndConsumption(final int duration, final int fps, final long timebase, final int width, final int height) throws Exception {
+    private void testNutGenerationAndConsumption(final int duration, final int fps,
+                                                 final long timebase, final int width,
+                                                 final int height) throws Exception {
         assertEquals(0, timebase % fps);
         Path mp4Path = Files.createTempFile("highResolution", ".mp4");
 
@@ -488,51 +485,54 @@ public class FrameIOTest {
 
         FFmpeg.atPath(Config.FFMPEG_BIN)
                 .addInput(FrameInput.withProducer(
-                        new FrameProducer() {
-                            private BufferedImage image;
-                            private long frame = 0;
-                            private long lastSecond = -1;
+                                new FrameProducer() {
+                                    private BufferedImage image;
+                                    private long frame = 0;
+                                    private long lastSecond = -1;
 
-                            @Override
-                            public List<Stream> produceStreams() {
-                                return Arrays.asList(
-                                        new Stream()
-                                                .setId(0)
-                                                .setType(Stream.Type.VIDEO)
-                                                .setWidth(width)
-                                                .setHeight(height)
-                                                .setTimebase(timebase)
-                                );
-                            }
+                                    @Override
+                                    public List<Stream> produceStreams() {
+                                        return Arrays.asList(
+                                                new Stream()
+                                                        .setId(0)
+                                                        .setType(Stream.Type.VIDEO)
+                                                        .setWidth(width)
+                                                        .setHeight(height)
+                                                        .setTimebase(timebase)
+                                        );
+                                    }
 
-                            @Override
-                            public Frame produce() {
-                                if (frame > duration * fps) {
-                                    return null;
-                                }
+                                    @Override
+                                    public Frame produce() {
+                                        if (frame > duration * fps) {
+                                            return null;
+                                        }
 
-                                long currentSecond = frame / fps;
-                                if (lastSecond != currentSecond) {
-                                    image = new BufferedImage(width, height, BufferedImage.TYPE_3BYTE_BGR);
-                                    Graphics2D g2d = image.createGraphics();
-                                    g2d.setPaint(Color.white);
-                                    g2d.setFont(new Font("Serif", Font.BOLD, height * 4 / 5));
-                                    String s = currentSecond + "";
-                                    FontMetrics fm = g2d.getFontMetrics();
-                                    int x = (image.getWidth() - fm.stringWidth(s)) / 2;
-                                    int y = height * 3 / 4;//image.getHeight() - (image.getHeight() - fm.getHeight()) / 2;
-                                    g2d.drawString(s, x, y);
-                                    g2d.dispose();
+                                        long currentSecond = frame / fps;
+                                        if (lastSecond != currentSecond) {
+                                            image = new BufferedImage(width, height,
+                                                    BufferedImage.TYPE_3BYTE_BGR);
+                                            Graphics2D g2d = image.createGraphics();
+                                            g2d.setPaint(Color.white);
+                                            g2d.setFont(new Font("Serif", Font.BOLD, height * 4 / 5));
+                                            String s = currentSecond + "";
+                                            FontMetrics fm = g2d.getFontMetrics();
+                                            int x = (image.getWidth() - fm.stringWidth(s)) / 2;
+                                            int y = height * 3 /
+                                                    4;//image.getHeight() - (image.getHeight() - fm.getHeight()) / 2;
+                                            g2d.drawString(s, x, y);
+                                            g2d.dispose();
 
-                                    lastSecond = currentSecond;
-                                }
+                                            lastSecond = currentSecond;
+                                        }
 
-                                Frame result = Frame.createVideoFrame(0, frame * timebase / fps, image);
-                                frame++;
+                                        Frame result =
+                                                Frame.createVideoFrame(0, frame * timebase / fps, image);
+                                        frame++;
 
-                                return result;
-                            }
-                        })
+                                        return result;
+                                    }
+                                })
                         .setFrameRate(fps)
                 )
                 .addOutput(UrlOutput.toPath(mp4Path))
@@ -545,11 +545,13 @@ public class FrameIOTest {
                 })
                 .execute();
 
-        Assert.assertNotNull(progressRef.get());
+        Assertions.assertNotNull(progressRef.get());
         // +1 frame for EOF
         int expectedFrames = duration * fps;
-        Assert.assertTrue("duration=" + duration + ", fps=" + fps + ", timebase=" + timebase
-                        + ", width=" + width + ", height=" + height + ", frames=" + progressRef.get().getFrame(),
-                expectedFrames == progressRef.get().getFrame() || expectedFrames + 1 == progressRef.get().getFrame());
+        assertTrue(expectedFrames == progressRef.get().getFrame() ||
+                        expectedFrames + 1 == progressRef.get().getFrame(),
+                "duration=" + duration + ", fps=" + fps + ", timebase=" + timebase
+                        + ", width=" + width + ", height=" + height + ", frames=" +
+                        progressRef.get().getFrame());
     }
 }

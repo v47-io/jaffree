@@ -1,6 +1,6 @@
 import name.remal.gradle_plugins.plugins.publish.ossrh.RepositoryHandlerOssrhExtension
-import org.gradle.api.JavaVersion.VERSION_1_8
-import java.util.Calendar
+import org.gradle.api.JavaVersion.VERSION_17
+import java.util.*
 
 plugins {
     `java-library`
@@ -23,16 +23,19 @@ dependencies {
 
     implementation(libs.slf4j)
 
-    testImplementation(libs.logback)
     testImplementation(libs.commonsIo)
-    testImplementation(libs.junit)
+    testImplementation(libs.junitApi)
+    testImplementation(libs.junitParams)
+
+    testRuntimeOnly(libs.logback)
+    testRuntimeOnly(libs.junitEngine)
 }
 
-java.sourceCompatibility = VERSION_1_8
-java.targetCompatibility = VERSION_1_8
+java.sourceCompatibility = VERSION_17
+java.targetCompatibility = VERSION_17
 
 tasks.test {
-    useJUnit()
+    useJUnitPlatform()
 }
 
 license {

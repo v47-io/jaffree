@@ -1,125 +1,122 @@
 package com.github.kokorin.jaffree.nut;
 
 import org.apache.commons.io.input.ClosedInputStream;
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.Timeout;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.EOFException;
 import java.io.IOException;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 public class NutInputStreamTest {
     private final NutInputStream closed = new NutInputStream(new ClosedInputStream());
     private final NutInputStream tooShortToReadValue = new NutInputStream(
-            new ByteArrayInputStream(new byte[]{(byte) 0xFF})
+            new ByteArrayInputStream(new byte[] {(byte) 0xFF})
     );
     private final NutInputStream tooShortToReadVarBytes = new NutInputStream(
-            new ByteArrayInputStream(new byte[]{(byte) 0x4, (byte) 42})
+            new ByteArrayInputStream(new byte[] {(byte) 0x4, (byte) 42})
     );
-
-    @Rule
-    public final Timeout timeout = Timeout.seconds(1);
 
     @Test
     public void getPosition() {
-        Assert.assertEquals(0, closed.getPosition());
+        Assertions.assertEquals(0, closed.getPosition());
     }
 
-    @Test(expected = EOFException.class)
-    public void readValueFromClosed() throws IOException {
-        closed.readValue();
+    @Test
+    public void readValueFromClosed() {
+        assertThrows(EOFException.class, closed::readValue);
     }
 
-    @Test(expected = EOFException.class)
-    public void readValueFromTooShort() throws IOException {
-        tooShortToReadValue.readValue();
+    @Test
+    public void readValueFromTooShort() {
+        assertThrows(EOFException.class, tooShortToReadValue::readValue);
     }
 
-    @Test(expected = EOFException.class)
-    public void readSignedValueFromClosed() throws IOException {
-        closed.readSignedValue();
+    @Test
+    public void readSignedValueFromClosed() {
+        assertThrows(EOFException.class, closed::readSignedValue);
     }
 
-    @Test(expected = EOFException.class)
-    public void readSignedValueFromTooShort() throws IOException {
-        tooShortToReadValue.readSignedValue();
+    @Test
+    public void readSignedValueFromTooShort() {
+        assertThrows(EOFException.class, tooShortToReadValue::readSignedValue);
     }
 
-    @Test(expected = EOFException.class)
-    public void readLongFromClosed() throws IOException {
-        closed.readLong();
+    @Test
+    public void readLongFromClosed() {
+        assertThrows(EOFException.class, closed::readLong);
     }
 
-    @Test(expected = EOFException.class)
-    public void readLongFromTooShort() throws IOException {
-        tooShortToReadValue.readLong();
+    @Test
+    public void readLongFromTooShort() {
+        assertThrows(EOFException.class, tooShortToReadValue::readLong);
     }
 
-    @Test(expected = EOFException.class)
-    public void readIntFromClosed() throws IOException {
-        closed.readInt();
+    @Test
+    public void readIntFromClosed() {
+        assertThrows(EOFException.class, closed::readInt);
     }
 
-    @Test(expected = EOFException.class)
-    public void readIntFromTooShort() throws IOException {
-        tooShortToReadValue.readInt();
+    @Test
+    public void readIntFromTooShort() {
+        assertThrows(EOFException.class, tooShortToReadValue::readInt);
     }
 
-    @Test(expected = EOFException.class)
-    public void readByteFromClosed() throws IOException {
-        closed.readByte();
+    @Test
+    public void readByteFromClosed() {
+        assertThrows(EOFException.class, closed::readByte);
     }
 
-    @Test(expected = EOFException.class)
-    public void readVariableStringFromClosed() throws IOException {
-        closed.readVariableString();
+    @Test
+    public void readVariableStringFromClosed() {
+        assertThrows(EOFException.class, closed::readVariableString);
     }
 
-    @Test(expected = EOFException.class)
-    public void readVariableStringFromTooShort() throws IOException {
-        tooShortToReadValue.readVariableString();
+    @Test
+    public void readVariableStringFromTooShort() {
+        assertThrows(EOFException.class, tooShortToReadValue::readVariableString);
     }
 
-    @Test(expected = EOFException.class)
-    public void readVariableStringFromTooShort2() throws IOException {
-        tooShortToReadVarBytes.readVariableString();
+    @Test
+    public void readVariableStringFromTooShort2() {
+        assertThrows(EOFException.class, tooShortToReadVarBytes::readVariableString);
     }
 
-    @Test(expected = EOFException.class)
-    public void readCStringFromClosed() throws IOException {
-        closed.readCString();
+    @Test
+    public void readCStringFromClosed() {
+        assertThrows(EOFException.class, closed::readCString);
     }
 
-    @Test(expected = EOFException.class)
-    public void readCStringFromTooShort() throws IOException {
-        closed.readCString();
+    @Test
+    public void readCStringFromTooShort() {
+        assertThrows(EOFException.class, closed::readCString);
     }
 
-    @Test(expected = EOFException.class)
-    public void readVariableBytesFromClosed() throws IOException {
-        closed.readVariableBytes();
+    @Test
+    public void readVariableBytesFromClosed() {
+        assertThrows(EOFException.class, closed::readVariableBytes);
     }
 
-    @Test(expected = EOFException.class)
-    public void readVariableBytesFromTooShort() throws IOException {
-        tooShortToReadValue.readVariableBytes();
+    @Test
+    public void readVariableBytesFromTooShort() {
+        assertThrows(EOFException.class, tooShortToReadValue::readVariableBytes);
     }
 
-    @Test(expected = EOFException.class)
-    public void readVariableBytesFromTooShort2() throws IOException {
-        tooShortToReadVarBytes.readVariableBytes();
+    @Test
+    public void readVariableBytesFromTooShort2() {
+        assertThrows(EOFException.class, tooShortToReadVarBytes::readVariableBytes);
     }
 
-    @Test(expected = EOFException.class)
-    public void readTimestampFromClosed() throws IOException {
-        closed.readTimestamp(4);
+    @Test
+    public void readTimestampFromClosed() {
+        assertThrows(EOFException.class, () -> closed.readTimestamp(4));
     }
 
-    @Test(expected = EOFException.class)
-    public void readTimestampFromTooShort() throws IOException {
-        tooShortToReadValue.readTimestamp(42);
+    @Test
+    public void readTimestampFromTooShort() {
+        assertThrows(EOFException.class, () -> tooShortToReadValue.readTimestamp(42));
     }
 
     @Test
@@ -129,40 +126,40 @@ public class NutInputStreamTest {
 
     @Test
     public void hasMoreData() throws IOException {
-        Assert.assertFalse(closed.hasMoreData());
-        Assert.assertTrue(tooShortToReadValue.hasMoreData());
-        Assert.assertTrue(tooShortToReadVarBytes.hasMoreData());
+        Assertions.assertFalse(closed.hasMoreData());
+        Assertions.assertTrue(tooShortToReadValue.hasMoreData());
+        Assertions.assertTrue(tooShortToReadVarBytes.hasMoreData());
     }
 
 
-    @Test(expected = EOFException.class)
-    public void readBytesFromClosed() throws IOException {
-        closed.readBytes(42);
+    @Test
+    public void readBytesFromClosed() {
+        assertThrows(EOFException.class, () -> closed.readBytes(42));
     }
 
 
-    @Test(expected = EOFException.class)
-    public void readBytesFromTooShort() throws IOException {
-        tooShortToReadValue.readBytes(42);
+    @Test
+    public void readBytesFromTooShort() {
+        assertThrows(EOFException.class, () -> tooShortToReadValue.readBytes(42));
     }
 
-    @Test(expected = EOFException.class)
-    public void readBytesFromTooShort2() throws IOException {
-        tooShortToReadVarBytes.readBytes(42);
+    @Test
+    public void readBytesFromTooShort2() {
+        assertThrows(EOFException.class, () -> tooShortToReadVarBytes.readBytes(42));
     }
 
-    @Test(expected = EOFException.class)
-    public void skipBytesFromClosed() throws IOException {
-        closed.skipBytes(42);
+    @Test
+    public void skipBytesFromClosed() {
+        assertThrows(EOFException.class, () -> closed.skipBytes(42));
     }
 
-    @Test(expected = EOFException.class)
-    public void skipBytesFromTooShort() throws IOException {
-        tooShortToReadValue.skipBytes(42);
+    @Test
+    public void skipBytesFromTooShort() {
+        assertThrows(EOFException.class, () -> tooShortToReadValue.skipBytes(42));
     }
 
-    @Test(expected = EOFException.class)
-    public void skipBytesFromTooShort2() throws IOException {
-        tooShortToReadVarBytes.skipBytes(42);
+    @Test
+    public void skipBytesFromTooShort2() {
+        assertThrows(EOFException.class, () -> tooShortToReadVarBytes.skipBytes(42));
     }
 }

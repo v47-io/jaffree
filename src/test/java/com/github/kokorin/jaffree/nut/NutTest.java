@@ -7,9 +7,8 @@ import com.github.kokorin.jaffree.ffmpeg.FFmpegResult;
 import com.github.kokorin.jaffree.ffmpeg.NullOutput;
 import com.github.kokorin.jaffree.ffmpeg.UrlInput;
 import com.github.kokorin.jaffree.ffmpeg.UrlOutput;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,9 +16,8 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class NutTest {
 
@@ -34,8 +32,10 @@ public class NutTest {
     public void readAndWrite() throws Exception {
         Path outputPath = Files.createTempFile("output", ".nut");
 
-        try (NutInputStream inputStream = new NutInputStream(new FileInputStream(Artifacts.VIDEO_NUT.toFile()));
-             NutOutputStream outputStream = new NutOutputStream(new FileOutputStream(outputPath.toFile()))) {
+        try (NutInputStream inputStream = new NutInputStream(
+                new FileInputStream(Artifacts.VIDEO_NUT.toFile()));
+             NutOutputStream outputStream = new NutOutputStream(
+                     new FileOutputStream(outputPath.toFile()))) {
             NutReader reader = new NutReader(inputStream);
             NutWriter writer = new NutWriter(outputStream, 200);
 
@@ -43,7 +43,8 @@ public class NutTest {
             StreamHeader[] streamHeaders = reader.getStreamHeaders();
             Info[] infos = reader.getInfos();
 
-            writer.setMainHeader(mainHeader.streamCount, mainHeader.maxDistance, mainHeader.timeBases, mainHeader.frameCodes);
+            writer.setMainHeader(mainHeader.streamCount, mainHeader.maxDistance,
+                    mainHeader.timeBases, mainHeader.frameCodes);
             writer.setStreamHeaders(streamHeaders);
             writer.setInfos(infos);
 
@@ -53,8 +54,8 @@ public class NutTest {
             }
         }
 
-        Assert.assertTrue(Files.exists(outputPath));
-        Assert.assertTrue(Files.size(outputPath) > 1000);
+        Assertions.assertTrue(Files.exists(outputPath));
+        Assertions.assertTrue(Files.size(outputPath) > 1000);
 
         assertNutStructure(outputPath);
 
@@ -68,8 +69,8 @@ public class NutTest {
                 .addOutput(new NullOutput())
                 .execute();
         assertNotNull(mpeg);
-        Assert.assertTrue(mpeg.getVideoSize() > 100_000);
-        Assert.assertTrue(mpeg.getAudioSize() > 10_000);
+        Assertions.assertTrue(mpeg.getVideoSize() > 100_000);
+        Assertions.assertTrue(mpeg.getAudioSize() > 10_000);
     }
 
     @Test
@@ -123,17 +124,17 @@ public class NutTest {
 
             MainHeader mainHeader = reader.getMainHeader();
             assertNotNull(mainHeader);
-            Assert.assertTrue(mainHeader.majorVersion >= 3);
+            Assertions.assertTrue(mainHeader.majorVersion >= 3);
 
             StreamHeader[] streamHeaders = reader.getStreamHeaders();
-            Assert.assertEquals(StreamHeader.Type.VIDEO, streamHeaders[0].streamType);
-            Assert.assertEquals(640, streamHeaders[0].video.width);
-            Assert.assertEquals(480, streamHeaders[0].video.height);
+            Assertions.assertEquals(StreamHeader.Type.VIDEO, streamHeaders[0].streamType);
+            Assertions.assertEquals(640, streamHeaders[0].video.width);
+            Assertions.assertEquals(480, streamHeaders[0].video.height);
 
-            Assert.assertEquals(StreamHeader.Type.AUDIO, streamHeaders[1].streamType);
-            Assert.assertEquals(1, streamHeaders[1].audio.channelCount);
-            Assert.assertEquals(44100, streamHeaders[1].audio.sampleRate.getNumerator());
-            Assert.assertEquals(1, streamHeaders[1].audio.sampleRate.getDenominator());
+            Assertions.assertEquals(StreamHeader.Type.AUDIO, streamHeaders[1].streamType);
+            Assertions.assertEquals(1, streamHeaders[1].audio.channelCount);
+            Assertions.assertEquals(44100, streamHeaders[1].audio.sampleRate.getNumerator());
+            Assertions.assertEquals(1, streamHeaders[1].audio.sampleRate.getDenominator());
 
             NutFrame frame = reader.readFrame();
             assertNotNull(frame);
@@ -146,13 +147,13 @@ public class NutTest {
                 } else if (frame.streamId == 1) {
                     audioFrameCount++;
                 } else {
-                    Assert.fail("Unexpected streamId: " + frame.streamId);
+                    Assertions.fail("Unexpected streamId: " + frame.streamId);
                 }
                 frame = reader.readFrame();
             } while (frame != null);
 
-            Assert.assertTrue(videoFrameCount > 300);
-            Assert.assertTrue(audioFrameCount > 300);
+            Assertions.assertTrue(videoFrameCount > 300);
+            Assertions.assertTrue(audioFrameCount > 300);
         }
 
     }

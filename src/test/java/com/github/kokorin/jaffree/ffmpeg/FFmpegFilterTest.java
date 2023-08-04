@@ -2,21 +2,18 @@ package com.github.kokorin.jaffree.ffmpeg;
 
 import com.github.kokorin.jaffree.Artifacts;
 import com.github.kokorin.jaffree.Config;
-import com.github.kokorin.jaffree.LogLevel;
 import com.github.kokorin.jaffree.StreamType;
 import com.github.kokorin.jaffree.ffprobe.FFprobe;
 import com.github.kokorin.jaffree.ffprobe.FFprobeResult;
 import com.github.kokorin.jaffree.ffprobe.Stream;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class FFmpegFilterTest {
 
@@ -133,8 +130,8 @@ public class FFmpegFilterTest {
             }
         }
 
-        Assert.assertEquals(640, width);
-        Assert.assertEquals(480, height);
+        Assertions.assertEquals(640, width);
+        Assertions.assertEquals(480, height);
 
     }
 
@@ -195,7 +192,7 @@ public class FFmpegFilterTest {
             duration = Math.max(duration, stream.getDuration());
         }
 
-        Assert.assertEquals(10.0, duration, 0.1);
+        Assertions.assertEquals(10.0, duration, 0.1);
     }
 
     @Test
@@ -247,6 +244,6 @@ public class FFmpegFilterTest {
             duration = Math.max(duration, stream.getDuration());
         }
 
-        Assert.assertEquals(15.0, duration, 0.1);
+        Assertions.assertEquals(15.0, duration, 0.1);
     }
 }

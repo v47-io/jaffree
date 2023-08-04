@@ -5,3 +5,4 @@ target
 dependency-reduced-pom.xml
 .git-versioned-pom.xml
 .gradle
+build

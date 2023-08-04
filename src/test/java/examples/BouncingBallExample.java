@@ -118,18 +118,21 @@ public class BouncingBallExample {
 
 
                 if (nextVideoTimecode <= nextAudioTimecode) {
-                    BufferedImage image = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_3BYTE_BGR);
+                    BufferedImage image =
+                            new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_3BYTE_BGR);
                     Graphics2D graphics = image.createGraphics();
                     graphics.setPaint(new Color(0, 0, 0));
                     graphics.fillRect(0, 0, WIDTH, HEIGHT);
                     graphics.setPaint(ballColor);
-                    graphics.fillOval(ballCenterX - BALL_RADIUS, ballCenterY - BALL_RADIUS, BALL_RADIUS * 2, BALL_RADIUS * 2);
+                    graphics.fillOval(ballCenterX - BALL_RADIUS, ballCenterY - BALL_RADIUS,
+                            BALL_RADIUS * 2, BALL_RADIUS * 2);
 
                     Frame videoFrame = Frame.createVideoFrame(0, nextVideoTimecode, image);
 
                     if (collisionVideoTimecode <= nextVideoTimecode) {
                         Random random = new Random();
-                        ballColor = new Color(random.nextInt(255), random.nextInt(255), random.nextInt(255));
+                        ballColor = new Color(random.nextInt(255), random.nextInt(255),
+                                random.nextInt(255));
                         collisionVideoTimecode = Integer.MAX_VALUE;
                     }
 
@@ -144,7 +147,8 @@ public class BouncingBallExample {
                     if (nextAudioTimecode < collisionAudioTimecode + BOUNCE_DURATION) {
                         for (int i = 0; i < nSamples; i++) {
                             double tSeconds = nextAudioTimecode / 1000. + i * 1.0 / SAMPLE_RATE;
-                            double amp = 2_0000_000_000L * Math.sin(BOUNCE_FREQUENCY * 2 * Math.PI * tSeconds);
+                            double amp = 2_0000_000_000L *
+                                    Math.sin(BOUNCE_FREQUENCY * 2 * Math.PI * tSeconds);
                             samples[i] = (int) amp;
                         }
                     } else {

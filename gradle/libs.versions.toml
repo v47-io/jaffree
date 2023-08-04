@@ -1,15 +1,17 @@
 [versions]
-commons-io = "2.11.0"
-junit = "4.13.2"
+commons-io = "2.13.0"
+junitJupiter = "5.10.0"
 license = "0.6.1"
-logback = "1.2.10"
+logback = "1.4.8"
 maven-publish-ossrh = "1.5.0"
-nanojson = "1.7"
-slf4j = "1.7.32"
+nanojson = "1.8"
+slf4j = "2.0.7"
 
 [libraries]
 commonsIo = { module = "commons-io:commons-io", version.ref = "commons-io" }
-junit = { module = "junit:junit", version.ref = "junit" }
+junitApi = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junitJupiter" }
+junitEngine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junitJupiter" }
+junitParams = { module = "org.junit.jupiter:junit-jupiter-params", version.ref = "junitJupiter" }
 logback = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
 nanojson = { module = "com.grack:nanojson", version.ref = "nanojson" }
 slf4j = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }

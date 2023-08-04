@@ -1,7 +1,9 @@
 package com.github.kokorin.jaffree;
 
-import static org.junit.Assert.assertEquals;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class RationalTest {
     @Test
@@ -21,9 +23,12 @@ public class RationalTest {
         assertEquals(Rational.ZERO, Rational.valueOf(0.));
         assertEquals(Rational.ONE, Rational.valueOf(1.));
         assertEquals(Rational.ONE.negate(), Rational.valueOf(-1.));
-        assertEquals(new Rational(3_333_333_333_333_333L, 10_000_000_000_000_000L), Rational.valueOf(1. / 3));
-        assertEquals(new Rational(1L, 10_000_000_000_000_000L), Rational.valueOf(1. / 10_000_000_000_000_000L));
-        assertEquals(new Rational(10_000_000_000_000_000L, 1L), Rational.valueOf(10_000_000_000_000_000.));
+        assertEquals(new Rational(3_333_333_333_333_333L, 10_000_000_000_000_000L),
+                Rational.valueOf(1. / 3));
+        assertEquals(new Rational(1L, 10_000_000_000_000_000L),
+                Rational.valueOf(1. / 10_000_000_000_000_000L));
+        assertEquals(new Rational(10_000_000_000_000_000L, 1L),
+                Rational.valueOf(10_000_000_000_000_000.));
 
         assertEquals(Rational.ONE, Rational.valueOf("1"));
         assertEquals(Rational.ONE, Rational.valueOf("1/1"));
@@ -68,18 +73,18 @@ public class RationalTest {
         assertEquals(new Rational(1, 2), new Rational(1, 6).add(new Rational(1, 3)));
     }
 
-    @Test(expected = NumberFormatException.class)
+    @Test
     public void valueOfNFE_1() {
-        Rational.valueOf("a");
+        assertThrows(NumberFormatException.class, () -> Rational.valueOf("a"));
     }
 
-    @Test(expected = NumberFormatException.class)
+    @Test
     public void valueOfNFE_2() {
-        Rational.valueOf("1/a");
+        assertThrows(NumberFormatException.class, () -> Rational.valueOf("1/a"));
     }
 
-    @Test(expected = NumberFormatException.class)
+    @Test
     public void valueOfNFE_3() {
-        Rational.valueOf("1/2/3");
+        assertThrows(NumberFormatException.class, () -> Rational.valueOf("1/2/3"));
     }
 }

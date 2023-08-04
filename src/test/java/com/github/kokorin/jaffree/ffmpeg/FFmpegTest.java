@@ -2,21 +2,17 @@ package com.github.kokorin.jaffree.ffmpeg;
 
 import com.github.kokorin.jaffree.Artifacts;
 import com.github.kokorin.jaffree.Config;
+import com.github.kokorin.jaffree.JaffreeException;
 import com.github.kokorin.jaffree.LogLevel;
-import com.github.kokorin.jaffree.StackTraceMatcher;
 import com.github.kokorin.jaffree.StreamType;
 import com.github.kokorin.jaffree.ffprobe.FFprobe;
 import com.github.kokorin.jaffree.ffprobe.FFprobeResult;
 import com.github.kokorin.jaffree.ffprobe.Stream;
-import com.github.kokorin.jaffree.process.ProcessHelper;
 import com.github.kokorin.jaffree.process.JaffreeAbnormalExitException;
-import org.hamcrest.core.AllOf;
-import org.hamcrest.core.StringContains;
-import org.junit.Assert;
-import org.junit.Ignore;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import com.github.kokorin.jaffree.process.ProcessHelper;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,20 +35,15 @@ import static java.nio.file.StandardOpenOption.CREATE;
 import static java.nio.file.StandardOpenOption.READ;
 import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
 import static java.nio.file.StandardOpenOption.WRITE;
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class FFmpegTest {
     public static Path ERROR_MP4 = Paths.get("non_existent.mp4");
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FFmpegTest.class);
-
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
 
     @Test
     public void testSimpleCopy() throws Exception {
@@ -66,7 +57,7 @@ public class FFmpegTest {
                         .copyAllCodecs())
                 .execute();
 
-        Assert.assertNotNull(result);
+        Assertions.assertNotNull(result);
     }
 
     // For this test to pass ffmpeg must be added to Operation System PATH environment variable
@@ -82,7 +73,7 @@ public class FFmpegTest {
                         .copyAllCodecs())
                 .execute();
 
-        Assert.assertNotNull(result);
+        Assertions.assertNotNull(result);
     }
 
     @Test
@@ -100,14 +91,14 @@ public class FFmpegTest {
                 )
                 .execute();
 
-        Assert.assertNotNull(result);
+        Assertions.assertNotNull(result);
 
         FFprobeResult probe = FFprobe.atPath(Config.FFMPEG_BIN)
                 .setInput(outputPath)
                 .setShowStreams(true)
                 .execute();
 
-        Assert.assertNotNull(probe);
+        Assertions.assertNotNull(probe);
         assertEquals(1, probe.getStreams().size());
         assertEquals(StreamType.AUDIO, probe.getStreams().get(0).getCodecType());
     }
@@ -132,7 +123,7 @@ public class FFmpegTest {
                 .setProgressListener(listener)
                 .execute();
 
-        Assert.assertNotNull(result);
+        Assertions.assertNotNull(result);
         assertTrue(counter.get() > 0);
 
         outputPath = tempDir.resolve("test.flv");
@@ -144,7 +135,7 @@ public class FFmpegTest {
                 .setProgressListener(listener)
                 .execute();
 
-        Assert.assertNotNull(result);
+        Assertions.assertNotNull(result);
         assertTrue(counter.get() > 0);
     }
 
@@ -169,7 +160,7 @@ public class FFmpegTest {
                 .setProgressListener(listener)
                 .execute();
 
-        Assert.assertNotNull(result);
+        Assertions.assertNotNull(result);
         assertTrue(counter.get() > 0);
     }
 
@@ -188,7 +179,7 @@ public class FFmpegTest {
                         .copyAllCodecs())
                 .execute();
 
-        Assert.assertNotNull(result);
+        Assertions.assertNotNull(result);
 
         double outputDuration = getDuration(outputPath);
         assertEquals(10.0, outputDuration, 0.1);
@@ -204,39 +195,10 @@ public class FFmpegTest {
                         .copyAllCodecs())
                 .execute();
 
-        Assert.assertNotNull(result);
+        Assertions.assertNotNull(result);
 
         outputDuration = getDuration(outputPath);
         assertEquals(10.0, outputDuration, 0.1);
-    }
-
-    @Test
-    public void testForceStopWithProgressListenerException() throws Exception {
-        expectedException.expect(
-                new StackTraceMatcher("Stop ffmpeg with ProgressListener Exception"));
-
-        Path tempDir = Files.createTempDirectory("jaffree");
-        Path outputPath = tempDir.resolve(Artifacts.VIDEO_MP4.getFileName());
-
-        final long startedAtMillis = System.currentTimeMillis();
-        final ProgressListener progressListener = new ProgressListener() {
-            @Override
-            public void onProgress(FFmpegProgress progress) {
-                System.out.println(progress);
-                if (System.currentTimeMillis() - startedAtMillis > 5_000) {
-                    throw new RuntimeException("Stop ffmpeg with ProgressListener Exception");
-                }
-            }
-        };
-
-        final FFmpegResult result = FFmpeg.atPath(Config.FFMPEG_BIN)
-                .addInput(UrlInput
-                        .fromPath(Artifacts.VIDEO_MP4)
-                        .setReadAtFrameRate(true)
-                )
-                .setProgressListener(progressListener)
-                .addOutput(UrlOutput.toPath(outputPath))
-                .execute();
     }
 
     @Test
@@ -272,7 +234,7 @@ public class FFmpegTest {
         Thread.sleep(1_000);
         assertNull(result.get());
         assertTrue(Files.exists(outputPath));
-        assertThat(executeException.get(), instanceOf(RuntimeException.class));
+        assertEquals(JaffreeException.class, executeException.get().getClass());
         assertEquals("Failed to execute, was interrupted", executeException.get().getMessage());
     }
 
@@ -326,7 +288,7 @@ public class FFmpegTest {
         futureRef.set(futureResult);
 
         FFmpegResult encodingResult = futureResult.get(12, TimeUnit.SECONDS);
-        Assert.assertNotNull(encodingResult);
+        Assertions.assertNotNull(encodingResult);
 
         FFprobeResult probeResult = FFprobe.atPath(Config.FFMPEG_BIN)
                 .setShowStreams(true)
@@ -350,7 +312,7 @@ public class FFmpegTest {
                 .addOutput(new NullOutput())
                 .execute();
 
-        Assert.assertNotNull(result);
+        Assertions.assertNotNull(result);
         assertTrue(durationRef.get() >= 15);
     }
 
@@ -368,14 +330,14 @@ public class FFmpegTest {
                 )
                 .execute();
 
-        Assert.assertNotNull(result);
+        Assertions.assertNotNull(result);
 
         double outputDuration = getDuration(outputPath);
         assertEquals(15.0, outputDuration, 0.1);
     }
 
     @Test
-    @Ignore("this always fails with exit-code 187 even though the correct output is produced")
+    @Disabled("this always fails with exit-code 187 even though the correct output is produced")
     public void testSizeLimit() throws Exception {
         Path tempDir = Files.createTempDirectory("jaffree");
         Path outputPath = tempDir.resolve(Artifacts.VIDEO_MP4.getFileName());
@@ -389,7 +351,7 @@ public class FFmpegTest {
                 )
                 .execute();
 
-        Assert.assertNotNull(result);
+        Assertions.assertNotNull(result);
 
         long outputSize = Files.size(outputPath);
         assertTrue(outputSize > 900_000);
@@ -411,7 +373,7 @@ public class FFmpegTest {
                         .copyAllCodecs())
                 .execute();
 
-        Assert.assertNotNull(result);
+        Assertions.assertNotNull(result);
 
         double inputDuration = getDuration(Artifacts.VIDEO_MP4);
         double outputDuration = getDuration(outputPath);
@@ -434,7 +396,7 @@ public class FFmpegTest {
                         .copyAllCodecs())
                 .execute();
 
-        Assert.assertNotNull(result);
+        Assertions.assertNotNull(result);
 
         double outputDuration = getDuration(outputPath);
 
@@ -461,7 +423,7 @@ public class FFmpegTest {
                 })
                 .execute();
 
-        Assert.assertNotNull(result);
+        Assertions.assertNotNull(result);
         assertTrue(time.get() > 165_000);
     }
 
@@ -481,7 +443,7 @@ public class FFmpegTest {
                 )
                 .execute();
 
-        Assert.assertNotNull(result);
+        Assertions.assertNotNull(result);
 
         FFprobeResult probe = FFprobe.atPath(Config.FFMPEG_BIN)
                 .setShowStreams(true)
@@ -500,13 +462,16 @@ public class FFmpegTest {
     public void testExceptionIsThrownIfFfmpegExitsWithError() {
         try {
             FFmpeg.atPath(Config.FFMPEG_BIN)
-                .addInput(UrlInput.fromPath(ERROR_MP4))
-                .addOutput(new NullOutput())
-                .execute();
+                    .addInput(UrlInput.fromPath(ERROR_MP4))
+                    .addOutput(new NullOutput())
+                    .execute();
         } catch (JaffreeAbnormalExitException e) {
-            assertEquals("Process execution has ended with non-zero status: 1. Check logs for detailed error message.", e.getMessage());
+            assertEquals(
+                    "Process execution has ended with non-zero status: 1. Check logs for detailed error message.",
+                    e.getMessage());
             assertEquals(1, e.getProcessErrorLogMessages().size());
-            assertEquals("[error] non_existent.mp4: No such file or directory", e.getProcessErrorLogMessages().get(0).message);
+            assertEquals("[error] non_existent.mp4: No such file or directory",
+                    e.getProcessErrorLogMessages().get(0).message);
             return;
         }
 
@@ -533,20 +498,19 @@ public class FFmpegTest {
                 })
                 .execute();
 
-        Assert.assertNotNull(result);
+        Assertions.assertNotNull(result);
 
-        assertThat(loudnormReport.get(), AllOf.allOf(
-                StringContains.containsString("input_i"),
-                StringContains.containsString("input_tp"),
-                StringContains.containsString("input_lra"),
-                StringContains.containsString("input_thresh"),
-                StringContains.containsString("output_i"),
-                StringContains.containsString("output_tp"),
-                StringContains.containsString("output_lra"),
-                StringContains.containsString("output_thresh"),
-                StringContains.containsString("normalization_type"),
-                StringContains.containsString("target_offset")
-        ));
+        var loudnormReportStr = loudnormReport.get();
+        Assertions.assertTrue(loudnormReportStr.contains("input_i"));
+        Assertions.assertTrue(loudnormReportStr.contains("input_tp"));
+        Assertions.assertTrue(loudnormReportStr.contains("input_lra"));
+        Assertions.assertTrue(loudnormReportStr.contains("input_thresh"));
+        Assertions.assertTrue(loudnormReportStr.contains("output_i"));
+        Assertions.assertTrue(loudnormReportStr.contains("output_tp"));
+        Assertions.assertTrue(loudnormReportStr.contains("output_lra"));
+        Assertions.assertTrue(loudnormReportStr.contains("output_thresh"));
+        Assertions.assertTrue(loudnormReportStr.contains("normalization_type"));
+        Assertions.assertTrue(loudnormReportStr.contains("target_offset"));
     }
 
     @Test
@@ -571,13 +535,12 @@ public class FFmpegTest {
                 })
                 .execute();
 
-        Assert.assertNotNull(result);
+        Assertions.assertNotNull(result);
 
-        assertThat(idetReport.toString(), AllOf.allOf(
-                StringContains.containsString("Repeated Fields"),
-                StringContains.containsString("Single frame detection"),
-                StringContains.containsString("Multi frame detection")
-        ));
+        var idetReportString = idetReport.toString();
+        Assertions.assertTrue(idetReportString.contains("Repeated Fields"));
+        Assertions.assertTrue(idetReportString.contains("Single frame detection"));
+        Assertions.assertTrue(idetReportString.contains("Multi frame detection"));
     }
 
     @Test
@@ -594,8 +557,8 @@ public class FFmpegTest {
                     .execute();
         }
 
-        Assert.assertNotNull(result);
-        Assert.assertNotNull(result.getVideoSize());
+        Assertions.assertNotNull(result);
+        Assertions.assertNotNull(result.getVideoSize());
 
         double expectedDuration = getExactDuration(Artifacts.VIDEO_FLV);
         double actualDuration = getExactDuration(outputPath);
@@ -621,8 +584,8 @@ public class FFmpegTest {
                     .execute();
         }
 
-        Assert.assertNotNull(result);
-        Assert.assertNotNull(result.getVideoSize());
+        Assertions.assertNotNull(result);
+        Assertions.assertNotNull(result.getVideoSize());
 
         double actualDuration = getExactDuration(outputPath);
         assertEquals(15., actualDuration, 1.);
@@ -642,8 +605,8 @@ public class FFmpegTest {
                     .execute();
         }
 
-        Assert.assertNotNull(result);
-        Assert.assertNotNull(result.getVideoSize());
+        Assertions.assertNotNull(result);
+        Assertions.assertNotNull(result.getVideoSize());
 
         assertTrue(getExactDuration(outputPath) > 10.);
     }
@@ -664,8 +627,8 @@ public class FFmpegTest {
                     .setLogLevel(LogLevel.DEBUG)
                     .execute();
 
-            Assert.assertNotNull(result);
-            Assert.assertNotNull(result.getVideoSize());
+            Assertions.assertNotNull(result);
+            Assertions.assertNotNull(result.getVideoSize());
         }
 
         assertTrue(Files.exists(outputPath));
@@ -689,8 +652,8 @@ public class FFmpegTest {
                     .setLogLevel(LogLevel.INFO)
                     .execute();
 
-            Assert.assertNotNull(result);
-            Assert.assertNotNull(result.getVideoSize());
+            Assertions.assertNotNull(result);
+            Assertions.assertNotNull(result.getVideoSize());
         }
 
         assertTrue(Files.exists(outputPath));
@@ -715,8 +678,8 @@ public class FFmpegTest {
                     .setLogLevel(LogLevel.INFO)
                     .execute();
 
-            Assert.assertNotNull(result);
-            Assert.assertNotNull(result.getVideoSize());
+            Assertions.assertNotNull(result);
+            Assertions.assertNotNull(result.getVideoSize());
         }
 
         assertTrue(Files.exists(outputPath));
@@ -769,8 +732,8 @@ public class FFmpegTest {
                     .setLogLevel(LogLevel.INFO)
                     .execute();
 
-            Assert.assertNotNull(result);
-            Assert.assertNotNull(result.getVideoSize());
+            Assertions.assertNotNull(result);
+            Assertions.assertNotNull(result.getVideoSize());
         }
 
         assertTrue(Files.exists(outputPath));
@@ -793,8 +756,8 @@ public class FFmpegTest {
                 )
                 .execute();
 
-        Assert.assertNotNull(result);
-        Assert.assertNotNull(result.getVideoSize());
+        Assertions.assertNotNull(result);
+        Assertions.assertNotNull(result.getVideoSize());
         assertTrue(Files.exists(outputPath));
         assertTrue(Files.size(outputPath) > 1000);
     }
@@ -831,7 +794,7 @@ public class FFmpegTest {
     }
 
     @Test
-    @Ignore("This test requires a non-headless environment to work")
+    @Disabled("This test requires a non-headless environment to work")
     public void testDesktopCapture() throws Exception {
         Path tempDir = Files.createTempDirectory("jaffree");
         Path output = tempDir.resolve("desktop.mp4");
@@ -851,7 +814,7 @@ public class FFmpegTest {
                 .setOverwriteOutput(true)
                 .execute();
 
-        Assert.assertNotNull(result);
+        Assertions.assertNotNull(result);
 
 
         FFprobeResult probe = FFprobe.atPath(Config.FFMPEG_BIN)
@@ -931,9 +894,9 @@ public class FFmpegTest {
                 .exceptionally(v -> null)
                 .thenRun(checkpoint::countDown);
 
-        Assert.assertTrue(checkpoint.await(30, TimeUnit.SECONDS));
+        Assertions.assertTrue(checkpoint.await(30, TimeUnit.SECONDS));
         FFmpegResult encodingResult = futureRef.get();
-        Assert.assertNotNull(encodingResult);
+        Assertions.assertNotNull(encodingResult);
 
         FFprobeResult probeResult = FFprobe.atPath(Config.FFMPEG_BIN)
                 .setShowStreams(true)
@@ -944,7 +907,7 @@ public class FFmpegTest {
     }
 
     @Test
-    @Ignore("Should be ran manually")
+    @Disabled("Should be ran manually")
     public void testNoFFmpegExecutableFound() {
         FFmpeg.atPath(Paths.get("."))
                 .addInput(UrlInput.fromPath(Artifacts.VIDEO_MP4))

@@ -18,9 +18,7 @@ import com.github.kokorin.jaffree.ffprobe.FFprobeResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.awt.Color;
-import java.awt.Graphics;
-import java.awt.Image;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.ImageObserver;
 import java.nio.file.Path;
@@ -193,7 +191,8 @@ public class MosaicExample {
             }
 
             public Frame produceVideoFrame(Frame[] videoFrames) {
-                BufferedImage mosaic = new BufferedImage(mosaicWidth, mosaicHeight, BufferedImage.TYPE_3BYTE_BGR);
+                BufferedImage mosaic =
+                        new BufferedImage(mosaicWidth, mosaicHeight, BufferedImage.TYPE_3BYTE_BGR);
                 Graphics mosaicGraphics = mosaic.getGraphics();
                 mosaicGraphics.setColor(new Color(0));
                 mosaicGraphics.fillRect(0, 0, mosaicWidth, mosaicHeight);
@@ -214,7 +213,8 @@ public class MosaicExample {
 
                     ImageObserver observer = new ImageObserver() {
                         @Override
-                        public boolean imageUpdate(Image img, int infoflags, int x, int y, int width, int height) {
+                        public boolean imageUpdate(Image img, int infoflags, int x, int y,
+                                                   int width, int height) {
                             return false;
                         }
                     };

@@ -2,18 +2,20 @@ package com.github.kokorin.jaffree.ffprobe;
 
 import com.github.kokorin.jaffree.StreamType;
 import com.github.kokorin.jaffree.ffprobe.data.FlatFormatParser;
-import static org.junit.Assert.assertEquals;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.InputStream;
 import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class FFprobeResultTest {
 
     @Test
     public void testChaptersWithFlatFormat() throws Exception {
         FFprobeResult result;
-        try (InputStream input = this.getClass().getResourceAsStream("./data/ffprobe_streams_and_chapters.flat")) {
+        try (InputStream input = this.getClass()
+                .getResourceAsStream("./data/ffprobe_streams_and_chapters.flat")) {
             result = new FFprobeResult(new FlatFormatParser().parse(input));
         }
         verifyChaptersFFprobeResult(result);
@@ -42,7 +44,8 @@ public class FFprobeResultTest {
     @Test
     public void testProgramsWithFlatFormat() throws Exception {
         FFprobeResult result;
-        try (InputStream input = this.getClass().getResourceAsStream("./data/ffprobe_programs.flat")) {
+        try (InputStream input = this.getClass()
+                .getResourceAsStream("./data/ffprobe_programs.flat")) {
             result = new FFprobeResult(new FlatFormatParser().parse(input));
         }
         verifyProgramsFFprobeResult(result);
@@ -54,10 +57,10 @@ public class FFprobeResultTest {
 
         for (int i = 0; i < 3; i++) {
             Program program = programs.get(i);
-            assertEquals("program " + i, (Integer) (i + 1), program.getProgramId());
-            assertEquals("program " + i, (Integer) (i + 1), program.getProgramNum());
-            assertEquals("program " + i, (Integer) 2, program.getNbStreams());
-            assertEquals("program " + i, "FFmpeg", program.getTag("service_provider"));
+            assertEquals((Integer) (i + 1), program.getProgramId(), "program " + i);
+            assertEquals((Integer) (i + 1), program.getProgramNum(), "program " + i);
+            assertEquals((Integer) 2, program.getNbStreams(), "program " + i);
+            assertEquals("FFmpeg", program.getTag("service_provider"), "program " + i);
             List<Stream> streams = program.getStreams();
             assertEquals(2, streams.size());
             Stream video = streams.get(0);

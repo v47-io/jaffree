@@ -13,7 +13,8 @@ import java.nio.file.StandardOpenOption;
 public class UsingChannelsExample {
     public static void main(String[] args) throws Exception {
         if (args.length != 2) {
-            System.err.println("Exactly 2 arguments expected: path to source and destination media files");
+            System.err.println(
+                    "Exactly 2 arguments expected: path to source and destination media files");
             System.exit(1);
         }
 

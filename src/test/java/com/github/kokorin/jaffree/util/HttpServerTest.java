@@ -1,7 +1,7 @@
 package com.github.kokorin.jaffree.util;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -15,7 +15,7 @@ public class HttpServerTest {
         try (AsynchronousServerSocketChannel server = AsynchronousServerSocketChannel.open()) {
             server.bind(address);
             address = (InetSocketAddress) server.getLocalAddress();
-            Assert.assertNotEquals(0, address.getPort());
+            Assertions.assertNotEquals(0, address.getPort());
         }
     }
 }

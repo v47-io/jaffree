@@ -1,8 +1,7 @@
 package com.github.kokorin.jaffree;
 
-import org.junit.Test;
-
-import static org.junit.Assert.assertEquals;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class OSTest {
     @Test
@@ -19,6 +18,6 @@ public class OSTest {
             count++;
         }
 
-        assertEquals("Exactly one property is true: " + OS.OS_NAME, 1, count);
+        Assertions.assertEquals(1, count, "Exactly one property is true: " + OS.OS_NAME);
     }
 }
