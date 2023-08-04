@@ -22,25 +22,18 @@ jobs:
         uses: actions/cache@v3
         with:
           path: .artifacts
-          key: ubuntu-artifacts-${{ hashFiles('**/Artifacts.java') }}
+          key: ${{ runner.os }}-artifacts-${{ hashFiles('**/Artifacts.java') }}
 
-      - name: Prepare environment
-        run: chmod +x ./gradlew
+      - name: Setup FFmpeg (${{ runner.os }})
+        uses: FedericoCarboni/setup-ffmpeg@v2
+        id: setup-ffmpeg-${{ runner.os }}
 
       - name: Build and test using gradle
         uses: burrunan/gradle-cache-action@v1
         with:
           arguments: --console=plain build
 
-      - name: Read library version
-        id: version_property
-        uses: christian-draeger/read-properties@1.0.1
-        with:
-          path: ./gradle.properties
-          property: version
-
       - name: Publish to Central Repository
-        # if: ${{ !endsWith(steps.version_property.outputs.value, '-SNAPSHOT') }}
         uses: burrunan/gradle-cache-action@v1
         with:
           arguments: --console=plain publish releaseNexusRepositories
