@@ -1,5 +1,3 @@
-[![SWUbanner](https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/banner-direct.svg)](https://github.com/vshymanskyy/StandWithUkraine/blob/main/docs/README.md)
-
 # jaffree
 
 Jaffree stands for JAva FFmpeg and FFprobe FREE command line wrapper. Jaffree supports programmatic video production and consumption (with transparency)
@@ -13,6 +11,7 @@ Inspired by [ffmpeg-cli-wrapper](https://github.com/bramp/ffmpeg-cli-wrapper)
 ## Dependencies
 
 - JDK 17
+- FFmpeg 4+
 
 ## License
 
@@ -29,7 +28,7 @@ distributed under the GNU General Public License Version 3.
 
 **JDK**: 17 (and soon 21)
 
-# Usage 
+## Usage 
 
 [![Maven Central](https://img.shields.io/maven-central/v/io.v47.jaffree/jaffree.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22io.v47.jaffree%22%20AND%20a:%22jaffree%22)
 
@@ -41,9 +40,13 @@ distributed under the GNU General Public License Version 3.
 </dependency>
 ```
 
-# Examples
+---
 
-## Checking media streams with ffprobe
+[![SWUbanner](https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/banner-direct.svg)](https://github.com/vshymanskyy/StandWithUkraine/blob/main/docs/README.md)
+
+## Examples
+
+### Checking media streams with ffprobe
 
 See whole example [here](src/test/java/examples/ShowStreamsExample.java).
 
@@ -60,7 +63,7 @@ for (Stream stream : result.getStreams()) {
 }
 ```
 
-## Detecting exact media file duration
+### Detecting exact media file duration
 
 Sometimes ffprobe can't show exact duration, use ffmpeg trancoding to NULL output to get it.
 
@@ -85,7 +88,7 @@ FFmpegResult ffmpegResult = FFmpeg.atPath()
 System.out.println("Exact duration: " + durationMillis.get() + " milliseconds");
 ```
 
-## Re-encode and track progress
+### Re-encode and track progress
 
 See whole example [here](src/test/java/examples/ReEncodeExample.java).
 
@@ -118,7 +121,7 @@ FFmpeg.atPath()
     .execute();
 ```
 
-## Cut and scale media file
+### Cut and scale media file
 
 Pay attention that arguments related to Input must be set at Input, not at FFmpeg.
 
@@ -141,7 +144,7 @@ FFmpeg.atPath()
     .execute();
 ```
 
-## Custom parsing of ffmpeg output
+### Custom parsing of ffmpeg output
 
 See whole example [here](src/test/java/examples/ParsingOutputExample.java).
 
@@ -164,7 +167,7 @@ FFmpeg.atPath()
 System.out.println("Loudnorm report:\n" + loudnormReport);
 ```
 
-## Supplying and consuming data with SeekableByteChannel
+### Supplying and consuming data with SeekableByteChannel
 
 Ability to interact with SeekableByteChannel is one of the features, which distinct Jaffree from 
 similar libraries. Under the hood Jaffree uses tiny FTP server to interact with SeekableByteChannel.
@@ -185,7 +188,7 @@ try (SeekableByteChannel inputChannel =
 }
 ```
 
-## Supplying and consuming data with InputStream and OutputStream
+### Supplying and consuming data with InputStream and OutputStream
 
 **Notice** It's recommended to use `ChannelInput` & `ChannelOutput` since ffmpeg leverage seeking in input and 
 requires seekable output for many formats.
@@ -211,7 +214,7 @@ try (InputStream inputStream =
 }
 ```
 
-## Live Stream Re-Streaming (HLS)
+### Live Stream Re-Streaming (HLS)
 
 See whole example [here](src/test/java/examples/ReStreamWithHls.java).
 
@@ -236,7 +239,7 @@ FFmpeg.atPath()
     .execute();
 ```
 
-## Screen Capture
+### Screen Capture
 
 See whole example [here](src/test/java/examples/ScreenCaptureExample.java).
 
@@ -266,7 +269,7 @@ FFmpeg.atPath()
 Files.move(pathToOptimized, pathToVideo, StandardCopyOption.REPLACE_EXISTING);
 ```
 
-## Produce Video in Pure Java Code
+### Produce Video in Pure Java Code
 
 See whole example [here](src/test/java/examples/ProduceVideoExample.java). 
 Check also more [advanced example](src/test/java/examples/BouncingBallExample.java) which produce 
@@ -314,7 +317,7 @@ Here is an output of the above example:
 
 ![example output](src/test/resources/examples/programmatic.gif)
 
-### Consume Video in Pure Java Code
+#### Consume Video in Pure Java Code
 
 See whole example [here](src/test/java/examples/ExtractFramesExample.java).
 
@@ -362,7 +365,7 @@ FFmpeg.atPath()
         .execute();
 ```
 
-## Managing errors
+### Managing errors
 
 Jaffree will raise exceptions when a fatal error that causes a non-zero exit code occurs.
 
@@ -381,11 +384,11 @@ FFmpeg.atPath()
 Please see [Issue 276](https://github.com/kokorin/Jaffree/issues/276) for more details on an actual
 usecase.
 
-## FFmpeg stop
+### FFmpeg stop
 
 See whole examples [here](src/test/java/examples/StopExample.java).
 
-### Grace stop
+#### Grace stop
 
 Start ffmpeg with `FFmpeg#executeAsync` and stop it with `FFmpegResultFuture#graceStop` (ffmpeg only).
 This will pass `q` symbol to ffmpeg's stdin.
@@ -399,7 +402,7 @@ Thread.sleep(5_000);
 future.graceStop();
 ```
 
-### Force stop
+#### Force stop
 
 There are 3 ways to stop ffmpeg forcefully.
 
@@ -443,7 +446,7 @@ Thread.sleep(5_000);
 thread.interrupt();
 ```
 
-## Java 8 Completion API
+### Java 8 Completion API
 
 See whole examples [here](src/test/java/examples/CompletionExample.java).
 
@@ -457,7 +460,7 @@ ffmpeg.executeAsync().toCompletableFuture()
     });
 ```
 
-## Complex Filtergraph (mosaic video)
+### Complex Filtergraph (mosaic video)
 
 More details about this example can be found on ffmpeg wiki:
 [Create a mosaic out of several input videos](https://trac.ffmpeg.org/wiki/Create%20a%20mosaic%20out%20of%20several%20input%20videos)
@@ -544,7 +547,7 @@ FFmpegResult result = FFmpeg.atPath(BIN)
         .execute();
 ```
 
-## Programmatic mosaic video creation
+### Programmatic mosaic video creation
 
 Jaffree allows simultaneous reading from several sources (with one instance per every source and target).
 You can find details in  Mosaic [example](src/test/java/examples/MosaicExample.java).

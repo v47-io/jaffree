@@ -145,6 +145,7 @@ public class Packet implements TagAware, PacketFrameSubtitle {
      * @deprecated description from ffmpeg source code: this was required for Matroska subtitles,
      * whose duration values could overflow when the duration field was still an int.
      */
+    @Deprecated
     public Long getConvergenceDuration() {
         return probeData.getLong("convergence_duration");
     }
@@ -157,6 +158,7 @@ public class Packet implements TagAware, PacketFrameSubtitle {
      * @deprecated description from ffmpeg source code: this was required for Matroska subtitles,
      * whose duration values could overflow when the duration field was still an int.
      */
+    @Deprecated
     public Float getConvergenceDurationTime() {
         return probeData.getFloat("convergence_duration_time");
     }

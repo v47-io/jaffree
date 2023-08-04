@@ -1,6 +1,7 @@
 [versions]
 commons-io = "2.13.0"
 junitJupiter = "5.10.0"
+kotlin = "1.9.0"
 license = "0.6.1"
 logback = "1.4.8"
 maven-publish-ossrh = "1.5.0"
@@ -18,6 +19,7 @@ nanojson = { module = "com.grack:nanojson", version.ref = "nanojson" }
 slf4j = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
 
 [plugins]
+kotlinJvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 license = { id = "org.cadixdev.licenser", version.ref = "license" }
 mavenPublishOssrh = { id = "name.remal.maven-publish-ossrh", version.ref = "maven-publish-ossrh" }
 release = { id = "net.researchgate.release", version.ref = "release" }

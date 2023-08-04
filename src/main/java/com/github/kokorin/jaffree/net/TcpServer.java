@@ -78,6 +78,7 @@ public abstract class TcpServer implements ProcessHelper {
      */
     protected abstract void serve(Socket socket) throws IOException;
 
+    @SuppressWarnings("deprecation")
     @Override
     protected final void finalize() throws Throwable {
         super.finalize();
