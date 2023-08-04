@@ -3,7 +3,7 @@ import org.gradle.api.JavaVersion.VERSION_17
 import java.util.*
 
 plugins {
-    `java-library`
+    alias(libs.plugins.kotlinJvm)
     checkstyle
     jacoco
     // pmd

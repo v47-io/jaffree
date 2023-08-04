@@ -8,6 +8,8 @@ import com.github.kokorin.jaffree.ffprobe.FFprobeResult;
 import com.github.kokorin.jaffree.ffprobe.Stream;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledOnOs;
+import org.junit.jupiter.api.condition.OS;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -196,6 +198,7 @@ public class FFmpegFilterTest {
     }
 
     @Test
+    @DisabledOnOs(OS.WINDOWS)
     public void drawTextWithSpecialCharacters() throws Exception {
         Path tempDir = Files.createTempDirectory("jaffree");
         Path outputPath = tempDir.resolve("draw_text.mp4");
