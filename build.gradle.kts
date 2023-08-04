@@ -10,6 +10,7 @@ plugins {
 
     alias(libs.plugins.license)
 
+    alias(libs.plugins.release)
     `maven-publish`
     alias(libs.plugins.mavenPublishOssrh) apply false
 }
@@ -50,6 +51,10 @@ license {
     properties {
         set("year", Calendar.getInstance().get(Calendar.YEAR))
     }
+}
+
+release {
+    tagTemplate.set("v\$version")
 }
 
 checkstyle {

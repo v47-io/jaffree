@@ -1,6 +1,6 @@
 [![SWUbanner](https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/banner-direct.svg)](https://github.com/vshymanskyy/StandWithUkraine/blob/main/docs/README.md)
 
-# Jaffree
+# jaffree
 
 Jaffree stands for JAva FFmpeg and FFprobe FREE command line wrapper. Jaffree supports programmatic video production and consumption (with transparency)
 
@@ -9,6 +9,10 @@ It integrates with ffmpeg via `java.lang.Process`.
 Fork of [Jaffree](https://github.com/kokorin/Jaffree)
 
 Inspired by [ffmpeg-cli-wrapper](https://github.com/bramp/ffmpeg-cli-wrapper)
+
+## Dependencies
+
+- JDK 17
 
 ## License
 
@@ -544,37 +548,3 @@ FFmpegResult result = FFmpeg.atPath(BIN)
 
 Jaffree allows simultaneous reading from several sources (with one instance per every source and target).
 You can find details in  Mosaic [example](src/test/java/examples/MosaicExample.java).
-
-# OBSOLETE README CONTENT
-
-# Build & configuration
-
-## IntelliJ IDEA
-
-This project uses [maven-git-versioning-extension](https://github.com/qoomon/maven-git-versioning-extension)
-to set project version automatically.
-Check its [intellij-setup](https://github.com/qoomon/maven-git-versioning-extension#intellij-setup) documentation.
-
-## JDK
-
-JDK8 is required to compile this project. JDK9 is required to compile this project with Java 9 module support.
-
-### JDK8
-
-```shell
-mvn clean install
-```
-
-### JDK9
-
-Maven profile `J9-module` enables two pass compilation:
-
-1. Compile all sources with Java 9 target version (including `module-info.java`).
-2. Recompile all sources (except `module-info.java`) with Java 8 target version.
-   
-After this all classes will have Java 8 bytecode (version 52), while `module-info.class`
-will have Java 9 bytecode (version 53).
-
-```shell
-mvn clean install -PJ9-module
-```

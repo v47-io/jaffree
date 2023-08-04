@@ -5,6 +5,7 @@ license = "0.6.1"
 logback = "1.4.8"
 maven-publish-ossrh = "1.5.0"
 nanojson = "1.8"
+release = "3.0.2"
 slf4j = "2.0.7"
 
 [libraries]
@@ -19,3 +20,4 @@ slf4j = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
 [plugins]
 license = { id = "org.cadixdev.licenser", version.ref = "license" }
 mavenPublishOssrh = { id = "name.remal.maven-publish-ossrh", version.ref = "maven-publish-ossrh" }
+release = { id = "net.researchgate.release", version.ref = "release" }

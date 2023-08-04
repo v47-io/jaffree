@@ -52,31 +52,15 @@ jobs:
         run: choco install ffmpeg && ffmpeg -version
         if: startsWith(matrix.os, 'windows')
 
-      - name: Build on Ubuntu
+      - name: Build (${{ runner.os }})
         uses: burrunan/gradle-cache-action@v1
-        if: startsWith(matrix.os, 'ubuntu')
         with:
-          job-id: ubuntu
-          arguments: --console=plain build
-
-      - name: Build on MacOS
-        uses: burrunan/gradle-cache-action@v1
-        if: startsWith(matrix.os, 'macos')
-        with:
-          job-id: macos
-          arguments: --console=plain build
-
-      - name: Build on Windows
-        uses: burrunan/gradle-cache-action@v1
-        if: startsWith(matrix.os, 'windows')
-        with:
-          job-id: windows
           arguments: --console=plain build
 
       - name: Test Report (${{ runner.os }})
         uses: dorny/test-reporter@v1
         if: success() || failure()
         with:
-          name: Tests (${{ runner.os }})
+          name: Tests (${{ runner.os }}, ${{ matrix.java-version }})
           reporter: java-junit
           path: '**/TEST-*.xml'
