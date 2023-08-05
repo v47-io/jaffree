@@ -28,6 +28,8 @@ distributed under the GNU General Public License Version 3.
 
 **JDK**: 17 (and soon 21)
 
+**FFmpeg**: 6.0, 5.1.2, 4.4.1
+
 ## Usage 
 
 [![Maven Central](https://img.shields.io/maven-central/v/io.v47.jaffree/jaffree.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22io.v47.jaffree%22%20AND%20a:%22jaffree%22)
