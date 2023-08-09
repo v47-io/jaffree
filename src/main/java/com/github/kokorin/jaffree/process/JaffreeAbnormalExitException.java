@@ -32,7 +32,7 @@ public class JaffreeAbnormalExitException extends JaffreeException {
      * Constructs a new {@link JaffreeAbnormalExitException} with the specified detail message
      * and additional context.
      *
-     * @param message message
+     * @param message                 message
      * @param processErrorLogMessages error log messages produced by the process
      */
     public JaffreeAbnormalExitException(final String message,

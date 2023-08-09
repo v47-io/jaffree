@@ -1,25 +1,29 @@
 [versions]
+annotations = "24.0.1"
 commons-io = "2.13.0"
 junitJupiter = "5.10.0"
 kotlin = "1.9.0"
-license = "0.6.1"
+license = "0.16.1"
 logback = "1.4.8"
 maven-publish-ossrh = "1.5.0"
 nanojson = "1.8"
+nuprocess = "2.0.6"
 release = "3.0.2"
 slf4j = "2.0.7"
 
 [libraries]
+annotations = { module = "org.jetbrains:annotations", version.ref = "annotations" }
 commonsIo = { module = "commons-io:commons-io", version.ref = "commons-io" }
 junitApi = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junitJupiter" }
 junitEngine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junitJupiter" }
 junitParams = { module = "org.junit.jupiter:junit-jupiter-params", version.ref = "junitJupiter" }
 logback = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
 nanojson = { module = "com.grack:nanojson", version.ref = "nanojson" }
+nuprocess = { module = "com.zaxxer:nuprocess", version.ref = "nuprocess" }
 slf4j = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
 
 [plugins]
 kotlinJvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
-license = { id = "org.cadixdev.licenser", version.ref = "license" }
+license = { id = "com.github.hierynomus.license", version.ref = "license" }
 mavenPublishOssrh = { id = "name.remal.maven-publish-ossrh", version.ref = "maven-publish-ossrh" }
 release = { id = "net.researchgate.release", version.ref = "release" }

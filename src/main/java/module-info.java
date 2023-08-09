@@ -16,10 +16,13 @@
  */
 
 module com.github.kokorin.jaffree {
+    requires kotlin.stdlib;
+    requires org.jetbrains.annotations;
     requires java.base;
     requires java.desktop;
     requires org.slf4j;
     requires com.grack.nanojson;
+    requires com.zaxxer.nuprocess;
 
     exports com.github.kokorin.jaffree;
     exports com.github.kokorin.jaffree.ffmpeg;
@@ -30,4 +33,6 @@ module com.github.kokorin.jaffree {
     exports com.github.kokorin.jaffree.nut;
     exports com.github.kokorin.jaffree.process;
     exports com.github.kokorin.jaffree.util;
+
+    exports io.v47.jaffree.process;
 }

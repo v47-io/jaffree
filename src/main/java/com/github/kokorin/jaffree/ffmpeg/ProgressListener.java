@@ -17,6 +17,8 @@
 
 package com.github.kokorin.jaffree.ffmpeg;
 
+import io.v47.jaffree.process.ProcessAccess;
+
 /**
  * Implement {@link ProgressListener} interface to receive ffmpeg progress reports.
  *
@@ -27,7 +29,8 @@ public interface ProgressListener {
      * Attention: this method is not thread safe and may be invoked in different thread.
      * Consider using synchronization.
      *
-     * @param progress ffmpeg progress
+     * @param progress      ffmpeg progress
+     * @param processAccess gives access to the current ffmpeg process
      */
-    void onProgress(FFmpegProgress progress);
+    void onProgress(FFmpegProgress progress, ProcessAccess processAccess);
 }

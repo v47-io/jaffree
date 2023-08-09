@@ -2,7 +2,6 @@ package examples;
 
 import com.github.kokorin.jaffree.ffmpeg.FFmpeg;
 import com.github.kokorin.jaffree.ffmpeg.NullOutput;
-import com.github.kokorin.jaffree.ffmpeg.OutputListener;
 import com.github.kokorin.jaffree.ffmpeg.UrlInput;
 
 public class ParsingOutputExample {
@@ -22,12 +21,7 @@ public class ParsingOutputExample {
                 .addInput(UrlInput.fromUrl(pathToVideo))
                 .addArguments("-af", "loudnorm=I=-16:TP=-1.5:LRA=11:print_format=json")
                 .addOutput(new NullOutput(false))
-                .setOutputListener(new OutputListener() {
-                    @Override
-                    public void onOutput(String line) {
-                        loudnormReport.append(line);
-                    }
-                })
+                .setOutputListener((line, processAccess) -> loudnormReport.append(line))
                 .execute();
 
         System.out.println("Loudnorm report:\n" + loudnormReport);

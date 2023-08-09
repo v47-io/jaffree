@@ -1,10 +1,8 @@
 package examples;
 
 import com.github.kokorin.jaffree.ffmpeg.FFmpeg;
-import com.github.kokorin.jaffree.ffmpeg.FFmpegProgress;
 import com.github.kokorin.jaffree.ffmpeg.FFmpegResult;
 import com.github.kokorin.jaffree.ffmpeg.NullOutput;
-import com.github.kokorin.jaffree.ffmpeg.ProgressListener;
 import com.github.kokorin.jaffree.ffmpeg.UrlInput;
 
 import java.util.concurrent.atomic.AtomicLong;
@@ -25,12 +23,9 @@ public class ExactDurationExample {
                         UrlInput.fromUrl(pathToVideo)
                 )
                 .addOutput(new NullOutput())
-                .setProgressListener(new ProgressListener() {
-                    @Override
-                    public void onProgress(FFmpegProgress progress) {
-                        durationMillis.set(progress.getTimeMillis());
-                    }
-                })
+                .setProgressListener(
+                        (progress, processAccess) -> durationMillis.set(progress.getTimeMillis())
+                )
                 .execute();
 
         System.out.println("Exact duration: " + durationMillis.get() + " milliseconds");

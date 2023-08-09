@@ -110,12 +110,7 @@ public class FFmpegTest {
 
         final AtomicLong counter = new AtomicLong();
 
-        ProgressListener listener = new ProgressListener() {
-            @Override
-            public void onProgress(FFmpegProgress progress) {
-                counter.incrementAndGet();
-            }
-        };
+        ProgressListener listener = (progress, processAccess) -> counter.incrementAndGet();
 
         FFmpegResult result = FFmpeg.atPath(Config.FFMPEG_BIN)
                 .addInput(UrlInput.fromPath(Artifacts.VIDEO_FLV))
@@ -146,12 +141,7 @@ public class FFmpegTest {
 
         final AtomicLong counter = new AtomicLong();
 
-        ProgressListener listener = new ProgressListener() {
-            @Override
-            public void onProgress(FFmpegProgress progress) {
-                counter.incrementAndGet();
-            }
-        };
+        ProgressListener listener = (progress, processAccess) -> counter.incrementAndGet();
 
         FFmpegResult result = FFmpeg.atPath(Config.FFMPEG_BIN)
                 .addInput(UrlInput.fromPath(Artifacts.VIDEO_FLV))
@@ -250,11 +240,11 @@ public class FFmpegTest {
                 )
                 .addOutput(UrlOutput.toPath(outputPath));
 
-        FFmpegResultFuture futureResult = ffmpeg.executeAsync();
+        var futureResult = ffmpeg.executeAsync();
 
         Thread.sleep(5_000);
 
-        futureResult.forceStop();
+        futureResult.getProcessAccess().stopForcefully();
 
         Thread.sleep(1_000);
 
@@ -267,25 +257,21 @@ public class FFmpegTest {
         Path outputPath = tempDir.resolve(Artifacts.VIDEO_MP4.getFileName());
 
         final AtomicBoolean ffmpegStopped = new AtomicBoolean();
-        final AtomicReference<FFmpegResultFuture> futureRef = new AtomicReference<>();
-        final ProgressListener progressListener = new ProgressListener() {
-            @Override
-            public void onProgress(FFmpegProgress progress) {
-                System.out.println(progress);
-                if (progress.getTime(TimeUnit.SECONDS) >= 15
-                        && ffmpegStopped.compareAndSet(false, true)) {
-                    futureRef.get().graceStop();
-                }
-            }
-        };
+        final ProgressListener progressListener =
+                (progress, processAccess) -> {
+                    System.out.println(progress);
+                    if (progress.getTime(TimeUnit.SECONDS) >= 15
+                            && ffmpegStopped.compareAndSet(false, true)) {
+                        processAccess.stopGracefully();
+                    }
+                };
 
         FFmpeg ffmpeg = FFmpeg.atPath(Config.FFMPEG_BIN)
                 .addInput(UrlInput.fromPath(Artifacts.VIDEO_MP4))
                 .setProgressListener(progressListener)
                 .addOutput(UrlOutput.toPath(outputPath));
 
-        FFmpegResultFuture futureResult = ffmpeg.executeAsync();
-        futureRef.set(futureResult);
+        var futureResult = ffmpeg.executeAsync();
 
         FFmpegResult encodingResult = futureResult.get(12, TimeUnit.SECONDS);
         Assertions.assertNotNull(encodingResult);
@@ -299,13 +285,12 @@ public class FFmpegTest {
 
 
         final AtomicReference<Long> durationRef = new AtomicReference<>();
-        final ProgressListener progressDurationListener = new ProgressListener() {
-            @Override
-            public void onProgress(FFmpegProgress progress) {
-                System.out.println(progress);
-                durationRef.set(progress.getTime(TimeUnit.SECONDS));
-            }
-        };
+        final ProgressListener progressDurationListener =
+                (progress, processAccess) -> {
+                    System.out.println(progress);
+                    durationRef.set(progress.getTime(TimeUnit.SECONDS));
+                };
+
         FFmpegResult result = FFmpeg.atPath(Config.FFMPEG_BIN)
                 .addInput(UrlInput.fromPath(outputPath))
                 .setProgressListener(progressDurationListener)
@@ -404,7 +389,7 @@ public class FFmpegTest {
     }
 
     @Test
-    public void testNullOutput() throws Exception {
+    public void testNullOutput() {
         final AtomicLong time = new AtomicLong();
 
         FFmpegResult result = FFmpeg.atPath(Config.FFMPEG_BIN)
@@ -415,12 +400,9 @@ public class FFmpegTest {
                         new NullOutput()
                 )
                 .setOverwriteOutput(true)
-                .setProgressListener(new ProgressListener() {
-                    @Override
-                    public void onProgress(FFmpegProgress progress) {
-                        time.set(progress.getTimeMillis());
-                    }
-                })
+                .setProgressListener(
+                        (progress, processAccess) -> time.set(progress.getTimeMillis())
+                )
                 .execute();
 
         Assertions.assertNotNull(result);
@@ -470,7 +452,7 @@ public class FFmpegTest {
                     "Process execution has ended with non-zero status: 1. Check logs for detailed error message.",
                     e.getMessage());
             assertEquals(1, e.getProcessErrorLogMessages().size());
-            assertEquals("[error] non_existent.mp4: No such file or directory",
+            assertEquals("non_existent.mp4: No such file or directory",
                     e.getProcessErrorLogMessages().get(0).message);
             return;
         }
@@ -488,12 +470,9 @@ public class FFmpegTest {
                 .addInput(UrlInput.fromPath(Artifacts.VIDEO_MP4))
                 .addArguments("-af", "loudnorm=I=-16:TP=-1.5:LRA=11:print_format=json")
                 .addOutput(new NullOutput(false))
-                .setOutputListener(new OutputListener() {
-                    @Override
-                    public void onOutput(String message) {
-                        if (message.contains("loudnorm")) {
-                            loudnormReport.set(message);
-                        }
+                .setOutputListener((message, processAccess) -> {
+                    if (message.contains("loudnorm")) {
+                        loudnormReport.set(message);
                     }
                 })
                 .execute();
@@ -525,12 +504,9 @@ public class FFmpegTest {
                         new NullOutput(false)
                                 .setFrameCount(StreamType.VIDEO, 100L)
                 )
-                .setOutputListener(new OutputListener() {
-                    @Override
-                    public void onOutput(String line) {
-                        if (line.startsWith("[Parsed_idet")) {
-                            idetReport.append(line);
-                        }
+                .setOutputListener((line, processAccess) -> {
+                    if (line.startsWith("[Parsed_idet")) {
+                        idetReport.append(line);
                     }
                 })
                 .execute();
@@ -782,12 +758,7 @@ public class FFmpegTest {
         FFmpegResult result = FFmpeg.atPath(Config.FFMPEG_BIN)
                 .addInput(UrlInput.fromPath(path))
                 .addOutput(new NullOutput())
-                .setProgressListener(new ProgressListener() {
-                    @Override
-                    public void onProgress(FFmpegProgress progress) {
-                        progressRef.set(progress);
-                    }
-                })
+                .setProgressListener((progress, processAccess) -> progressRef.set(progress))
                 .execute();
 
         return progressRef.get().getTime(TimeUnit.SECONDS);
@@ -904,14 +875,5 @@ public class FFmpegTest {
                 .execute();
 
         assertEquals(2, probeResult.getStreams().size());
-    }
-
-    @Test
-    @Disabled("Should be ran manually")
-    public void testNoFFmpegExecutableFound() {
-        FFmpeg.atPath(Paths.get("."))
-                .addInput(UrlInput.fromPath(Artifacts.VIDEO_MP4))
-                .addOutput(new NullOutput())
-                .execute();
     }
 }

@@ -17,6 +17,10 @@
 
 package com.github.kokorin.jaffree.net;
 
+import io.v47.jaffree.process.ProcessAccess;
+import io.v47.jaffree.process.ProcessAccessor;
+import org.jetbrains.annotations.NotNull;
+
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -24,7 +28,7 @@ import java.net.Socket;
 /**
  * {@link TcpServer} implementation using {@link TcpNegotiator} to serve TCP connection.
  */
-public class NegotiatingTcpServer extends TcpServer {
+public class NegotiatingTcpServer extends TcpServer implements ProcessAccessor {
     private final TcpNegotiator negotiator;
 
     protected NegotiatingTcpServer(final ServerSocket serverSocket,
@@ -42,6 +46,13 @@ public class NegotiatingTcpServer extends TcpServer {
     @Override
     protected void serve(final Socket socket) throws IOException {
         negotiator.negotiate(socket);
+    }
+
+    @Override
+    public void setProcessAccess(@NotNull ProcessAccess processAccess) {
+        if (negotiator instanceof ProcessAccessor ac) {
+            ac.setProcessAccess(processAccess);
+        }
     }
 
     /**

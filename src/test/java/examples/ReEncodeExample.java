@@ -1,9 +1,7 @@
 package examples;
 
 import com.github.kokorin.jaffree.ffmpeg.FFmpeg;
-import com.github.kokorin.jaffree.ffmpeg.FFmpegProgress;
 import com.github.kokorin.jaffree.ffmpeg.NullOutput;
-import com.github.kokorin.jaffree.ffmpeg.ProgressListener;
 import com.github.kokorin.jaffree.ffmpeg.UrlInput;
 import com.github.kokorin.jaffree.ffmpeg.UrlOutput;
 
@@ -26,12 +24,9 @@ public class ReEncodeExample {
                 .addInput(UrlInput.fromUrl(pathToSrc))
                 .setOverwriteOutput(true)
                 .addOutput(new NullOutput())
-                .setProgressListener(new ProgressListener() {
-                    @Override
-                    public void onProgress(FFmpegProgress progress) {
-                        duration.set(progress.getTimeMillis());
-                    }
-                })
+                .setProgressListener(
+                        (progress, processAccess) -> duration.set(progress.getTimeMillis())
+                )
                 .execute();
 
         FFmpeg.atPath()
@@ -39,12 +34,9 @@ public class ReEncodeExample {
                 .setOverwriteOutput(true)
                 .addArguments("-movflags", "faststart")
                 .addOutput(UrlOutput.toUrl(pathToDst))
-                .setProgressListener(new ProgressListener() {
-                    @Override
-                    public void onProgress(FFmpegProgress progress) {
-                        double percents = 100. * progress.getTimeMillis() / duration.get();
-                        System.out.println("Progress: " + percents + "%");
-                    }
+                .setProgressListener((progress, processAccess) -> {
+                    double percents = 100. * progress.getTimeMillis() / duration.get();
+                    System.out.println("Progress: " + percents + "%");
                 })
                 .execute();
 

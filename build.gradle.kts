@@ -20,8 +20,10 @@ repositories {
 }
 
 dependencies {
-    api(libs.nanojson)
+    api(libs.annotations)
 
+    implementation(libs.nanojson)
+    implementation(libs.nuprocess)
     implementation(libs.slf4j)
 
     testImplementation(libs.commonsIo)
@@ -35,20 +37,34 @@ dependencies {
 java.sourceCompatibility = VERSION_17
 java.targetCompatibility = VERSION_17
 
+kotlin {
+    jvmToolchain(17)
+}
+
+tasks.compileKotlin {
+    destinationDirectory.set(tasks.compileJava.get().destinationDirectory)
+}
+
 tasks.test {
     useJUnitPlatform()
 }
 
 license {
-    exclude(
+    excludePatterns = setOf(
+        "**/*.flat",
+        "**/*.gif",
         "**/*.java",
+        "**/*.json",
+        "**/*.log",
+        "**/*.mp4",
+        "**/*.txt",
         "**/*.xml"
     )
 
-    header(file("HEADER.txt"))
-    skipExistingHeaders(true)
+    header = file("HEADER.txt")
+    skipExistingHeaders = false
 
-    properties {
+    ext {
         set("year", Calendar.getInstance().get(Calendar.YEAR))
     }
 }

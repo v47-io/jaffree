@@ -17,6 +17,8 @@
 
 package com.github.kokorin.jaffree.ffmpeg;
 
+import io.v47.jaffree.process.ProcessAccess;
+
 /**
  * Extend this interface to analyze ffmpeg output.
  */
@@ -27,7 +29,8 @@ public interface OutputListener {
      * Attention: this method is not thread safe and may be invoked in different thread.
      * Consider using synchronization.
      *
-     * @param message ffmpeg log message
+     * @param message       ffmpeg log message
+     * @param processAccess gives access to the process that produced that output
      */
-    void onOutput(String message);
+    void onOutput(String message, ProcessAccess processAccess);
 }

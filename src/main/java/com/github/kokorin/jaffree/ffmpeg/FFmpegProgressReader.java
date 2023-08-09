@@ -19,6 +19,9 @@ package com.github.kokorin.jaffree.ffmpeg;
 
 import com.github.kokorin.jaffree.net.TcpNegotiator;
 import com.github.kokorin.jaffree.util.ParseUtil;
+import io.v47.jaffree.process.ProcessAccess;
+import io.v47.jaffree.process.ProcessAccessor;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,8 +35,10 @@ import java.net.Socket;
  * {@link FFmpegProgressReader} receives periodical ffmpeg progress report, parses it and passes
  * to {@link ProgressListener}.
  */
-public class FFmpegProgressReader implements TcpNegotiator {
+public class FFmpegProgressReader implements TcpNegotiator, ProcessAccessor {
+    private ProcessAccess processAccess;
     private final ProgressListener progressListener;
+
     private static final Logger LOGGER = LoggerFactory.getLogger(FFmpegProgressReader.class);
 
     /**
@@ -53,6 +58,16 @@ public class FFmpegProgressReader implements TcpNegotiator {
         try (InputStream inputStream = socket.getInputStream()) {
             readProgress(inputStream);
         }
+    }
+
+    /**
+     * Set's the ProcessAccess of the currently running process for which progress is being reported.
+     *
+     * @param processAccess gives access to the process for which progress is being reported.
+     */
+    @Override
+    public void setProcessAccess(@NotNull final ProcessAccess processAccess) {
+        this.processAccess = processAccess;
     }
 
     /**
@@ -143,7 +158,7 @@ public class FFmpegProgressReader implements TcpNegotiator {
                     dupFrames = null;
                     dropFrames = null;
                     speed = null;
-                    progressListener.onProgress(progress);
+                    progressListener.onProgress(progress, processAccess);
                     break;
                 default:
                     if (key.startsWith("stream_")) {

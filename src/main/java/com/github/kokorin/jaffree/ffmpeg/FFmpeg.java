@@ -1,4 +1,20 @@
 /*
+ * Copyright (C) 2023 jaffree Authors
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+/*
  *    Copyright 2017-2021 Denis Kokorin, Oded Arbel
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,14 +33,15 @@
 
 package com.github.kokorin.jaffree.ffmpeg;
 
+import com.github.kokorin.jaffree.JaffreeException;
 import com.github.kokorin.jaffree.LogLevel;
 import com.github.kokorin.jaffree.StreamType;
 import com.github.kokorin.jaffree.net.NegotiatingTcpServer;
-import com.github.kokorin.jaffree.process.LoggingStdReader;
-import com.github.kokorin.jaffree.process.ProcessHandler;
+import com.github.kokorin.jaffree.process.JaffreeAbnormalExitException;
 import com.github.kokorin.jaffree.process.ProcessHelper;
-import com.github.kokorin.jaffree.process.StdReader;
-import com.github.kokorin.jaffree.process.Stopper;
+import io.v47.jaffree.ffmpeg.FFmpegProcessHandler;
+import io.v47.jaffree.process.ProcessFuture;
+import io.v47.jaffree.process.ProcessRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,12 +49,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CancellationException;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutionException;
 
 /**
  * {@link FFmpeg} provides an ability to start &amp; stop ffmpeg process and keep track of
@@ -336,7 +352,7 @@ public class FFmpeg {
      *
      * @param outputListener output listener
      * @return this
-     * @see FFmpegResultReader
+     * @see FFmpegProcessHandler
      */
     public FFmpeg setOutputListener(final OutputListener outputListener) {
         this.outputListener = outputListener;
@@ -395,9 +411,27 @@ public class FFmpeg {
      * @return ffmpeg result
      */
     public FFmpegResult execute() {
-        return createProcessHandler()
-                .setStopper(createStopper())
-                .execute();
+        try {
+            return executeAsync().get();
+        } catch (InterruptedException e) {
+            throw new JaffreeException("Failed to execute, was interrupted", e);
+        } catch (ExecutionException e) {
+            RuntimeException x = new JaffreeAbnormalExitException(
+                    "Process execution has ended with non-zero status: 1. Check logs for detailed error message.",
+                    Collections.emptyList());
+
+            if (e.getCause() != null) {
+                if (e.getCause() instanceof JaffreeAbnormalExitException jx) {
+                    x = jx;
+                } else {
+                    x.initCause(e.getCause());
+                }
+            } else {
+                x.initCause(e);
+            }
+
+            throw x;
+        }
     }
 
     /**
@@ -405,136 +439,41 @@ public class FFmpeg {
      *
      * @return ffmpeg result future
      */
-    public FFmpegResultFuture executeAsync() {
-        return executeAsync(new Executor() {
-            @Override
-            public void execute(final Runnable command) {
-                Thread runner = new Thread(command, "FFmpeg-async-runner");
-                runner.setDaemon(true);
-                runner.start();
-            }
-        });
-    }
+    public ProcessFuture<FFmpegResult> executeAsync() {
+        var helpers = new ArrayList<Runnable>();
 
-    /**
-     * Starts asynchronous ffmpeg execution, executed using the supplied Executor.
-     *
-     * @param executor the executor to use for asynchronous execution
-     * @return ffmpeg result future
-     */
-    public FFmpegResultFuture executeAsync(final Executor executor) {
-        final ProcessHandler<FFmpegResult> processHandler = createProcessHandler();
-        Stopper stopper = createStopper();
-        processHandler.setStopper(stopper);
-
-        CompletableFuture<FFmpegResult> resultFuture = new CompletableFuture<FFmpegResult>() {
-            @Override
-            public boolean cancel(final boolean mayInterruptIfRunning) {
-                if (mayInterruptIfRunning) {
-                    stopper.forceStop();
-                } else {
-                    stopper.graceStop();
-                }
-                return completeExceptionally(new CancellationException());
-            }
-        };
-
-        executor.execute(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    resultFuture.complete(processHandler.execute());
-                } catch (Throwable error) {
-                    resultFuture.completeExceptionally(error);
-                }
-            }
-        });
-
-        return new FFmpegResultFuture(resultFuture, stopper);
-    }
-
-    /**
-     * Creates {@link ProcessHandler} which executes ffmpeg command and starts specified
-     * {@link ProcessHelper ProcessHelpers}.
-     *
-     * @return ProcessHandler
-     */
-    protected ProcessHandler<FFmpegResult> createProcessHandler() {
-        List<ProcessHelper> helpers = new ArrayList<>();
-
-        for (Input input : inputs) {
-            ProcessHelper helper = input.helperThread();
+        inputs.forEach(it -> {
+            var helper = it.helperThread();
             if (helper != null) {
                 helpers.add(helper);
             }
-        }
-        for (Output output : outputs) {
-            ProcessHelper helper = output.helperThread();
+        });
+
+        outputs.forEach(it -> {
+            var helper = it.helperThread();
             if (helper != null) {
                 helpers.add(helper);
             }
-        }
+        });
 
-        ProcessHelper progressHelper = createProgressHelper(progressListener);
-        if (progressHelper != null) {
+        if (progressListener != null) {
+            var progressHelper = createProgressHelper(progressListener);
             helpers.add(progressHelper);
         }
 
-        return new ProcessHandler<FFmpegResult>(executable, contextName)
-                .setStdErrReader(createStdErrReader(outputListener))
-                .setStdOutReader(createStdOutReader())
+        return new ProcessRunner<>(executable,
+                new FFmpegProcessHandler(outputListener))
+                .setArguments(buildArguments())
                 .setHelpers(helpers)
-                .setArguments(buildArguments());
+                .executeAsync();
     }
 
-    /**
-     * Creates {@link Stopper} which is used to stop ffmpeg gracefully and forcefully.
-     *
-     * @return Stopper
-     */
-    protected Stopper createStopper() {
-        return new FFmpegStopper();
-    }
-
-    /**
-     * Creates {@link StdReader} which is used to read ffmpeg stderr.
-     * <p>
-     * Note: should be overridden wisely: otherwise {@link FFmpeg} may produce wrong result or
-     * even produce an error.
-     *
-     * @param listener output listener for non-progress-related ffmpeg output
-     * @return this
-     */
-    protected StdReader<FFmpegResult> createStdErrReader(final OutputListener listener) {
-        return new FFmpegResultReader(listener);
-    }
-
-    /**
-     * Creates {@link StdReader} which is used to read ffmpeg stderr.
-     * <p>
-     * Note: default implementation simply logs everything with SLF4J.
-     *
-     * @return this
-     */
-    protected StdReader<FFmpegResult> createStdOutReader() {
-        return new LoggingStdReader<>();
-    }
-
-    /**
-     * Creates {@link ProcessHelper} if required. It receives ffmpeg progress report, parses it
-     * and passes to listener.
-     *
-     * @param listener progress listener
-     * @return ProcessHelper, or null
-     */
-    protected ProcessHelper createProgressHelper(final ProgressListener listener) {
+    private ProcessHelper createProgressHelper(final ProgressListener listener) {
         NegotiatingTcpServer result = null;
         String progressReportUrl = null;
 
         if (listener != null) {
-            result = NegotiatingTcpServer.onRandomPort(
-                    new FFmpegProgressReader(listener)
-            );
+            result = NegotiatingTcpServer.onRandomPort(new FFmpegProgressReader(listener));
             progressReportUrl = "tcp://" + result.getAddressAndPort();
         }
 
@@ -556,14 +495,13 @@ public class FFmpeg {
      * @return arguments list
      */
     protected List<String> buildArguments() {
-        List<String> result = new ArrayList<>();
 
         // "level" is required for ffmpeg to add [loglevel] to output lines
         String logLevelArgument = "level";
         if (logLevel != null) {
             logLevelArgument += "+" + logLevel.name().toLowerCase();
         }
-        result.addAll(Arrays.asList("-loglevel", logLevelArgument));
+        var result = new ArrayList<>(Arrays.asList("-loglevel", logLevelArgument));
 
         for (Input input : inputs) {
             result.addAll(input.buildArguments());

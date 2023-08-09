@@ -537,12 +537,7 @@ public class FrameIOTest {
                 )
                 .addOutput(UrlOutput.toPath(mp4Path))
                 .setOverwriteOutput(true)
-                .setProgressListener(new ProgressListener() {
-                    @Override
-                    public void onProgress(FFmpegProgress progress) {
-                        progressRef.set(progress);
-                    }
-                })
+                .setProgressListener((progress, processAccess) -> progressRef.set(progress))
                 .execute();
 
         Assertions.assertNotNull(progressRef.get());

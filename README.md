@@ -25,6 +25,7 @@ outlook that tries to maintain 99% API compatibility with the original.
 - Async FFprobe execution, not just FFmpeg
 - Using the latest versions of all dependencies and plugins
 - Gradle instead of Maven
+- JDK support starts at 11
 
 ## Dependencies
 

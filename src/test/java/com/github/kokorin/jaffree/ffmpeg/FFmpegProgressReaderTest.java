@@ -14,12 +14,7 @@ public class FFmpegProgressReaderTest {
     public void readProgress() throws Exception {
         final List<FFmpegProgress> progressList = new ArrayList<>();
 
-        ProgressListener listener = new ProgressListener() {
-            @Override
-            public void onProgress(FFmpegProgress progress) {
-                progressList.add(progress);
-            }
-        };
+        ProgressListener listener = (progress, processAccess) -> progressList.add(progress);
 
         FFmpegProgressReader reader = new FFmpegProgressReader(listener);
         try (InputStream inputStream = getClass().getResourceAsStream("progress.log")) {
@@ -64,7 +59,7 @@ public class FFmpegProgressReaderTest {
     public void readProgressNA() throws Exception {
         final List<FFmpegProgress> progressList = new ArrayList<>();
 
-        ProgressListener listener = progressList::add;
+        ProgressListener listener = (progress, processAccess) -> progressList.add(progress);
 
         FFmpegProgressReader reader = new FFmpegProgressReader(listener);
         try (InputStream inputStream = getClass().getResourceAsStream("progress-na.log")) {
