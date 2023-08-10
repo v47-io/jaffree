@@ -16,6 +16,6 @@
  */
 
 /**
- * Claases used to integrate with {@link java.lang.Process}.
+ * Some classes related to process handling
  */
 package com.github.kokorin.jaffree.process;

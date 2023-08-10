@@ -25,7 +25,7 @@ import kotlin.concurrent.Volatile
 private const val CARRIAGE_RETURN = '\r'.code.toByte()
 private const val NEWLINE = '\n'.code.toByte()
 
-abstract class LinesProcessHandler<R> : JaffreeProcessHandler<R> {
+internal abstract class LinesProcessHandler<R> : JaffreeProcessHandler<R> {
     @Volatile
     override var result: R? = null
         protected set

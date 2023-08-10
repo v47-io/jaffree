@@ -28,7 +28,7 @@ import java.util.concurrent.TimeUnit
 
 private val logger = LoggerFactory.getLogger(ProcessRunner::class.java)!!
 
-class ProcessRunner<T>(
+internal class ProcessRunner<T>(
     private val executable: Path,
     private val processHandler: JaffreeProcessHandler<T>
 ) {
@@ -45,7 +45,7 @@ class ProcessRunner<T>(
         return this
     }
 
-    @Suppress("ThrowsCount")
+    @Suppress("LongMethod", "ThrowsCount")
     @Synchronized
     fun executeAsync(): ProcessFuture<T> {
         val execTag = generateRandomId()

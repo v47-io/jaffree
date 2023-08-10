@@ -16,6 +16,6 @@
  */
 package io.v47.jaffree.process
 
-interface ProcessAccessor {
+internal interface ProcessAccessor {
     fun setProcessAccess(processAccess: ProcessAccess)
 }

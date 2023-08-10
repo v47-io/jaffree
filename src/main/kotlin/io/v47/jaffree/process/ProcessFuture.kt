@@ -29,19 +29,43 @@ import java.util.function.BiFunction
 import java.util.function.Consumer
 import java.util.function.Function
 
+/**
+ * A combination of [Future] and [CompletionStage] that also provides access to process internals
+ * via [processAccess].
+ */
 interface ProcessFuture<T> : Future<T>, CompletionStage<T> {
+    /**
+     * @suppress
+     */
     companion object {
-        operator fun <T> invoke(
+        internal operator fun <T> invoke(
             delegate: CompletableFuture<T>,
             processAccess: ProcessAccess
         ): ProcessFuture<T> =
             ProcessFutureImpl(delegate, processAccess)
     }
 
+    /**
+     * Gives access to the running process
+     */
     val processAccess: ProcessAccess
 
+    /**
+     * Waits if necessary for the computation to complete, and then retrieves its result.
+     *
+     * @return the computed result
+     */
     override fun get(): T
 
+    /**
+     * Waits if necessary for at most the given time for the computation to complete,
+     * and then retrieves its result, if available.
+     *
+     * @param timeout the maximum time to wait
+     * @param unit the time unit of the timeout argument
+     *
+     * @return the computed result
+     */
     override fun get(timeout: Long, unit: TimeUnit): T
 }
 

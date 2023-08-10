@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory
 
 private val ffmpegLogger = LoggerFactory.getLogger(FFmpeg::class.java)!!
 
-class FFmpegProcessHandler(
+internal class FFmpegProcessHandler(
     private val outputListener: OutputListener?
 ) : LinesProcessHandler<FFmpegResult>(), ProcessAccessor {
     private lateinit var processAccess: ProcessAccess

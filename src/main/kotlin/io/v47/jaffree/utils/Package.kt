@@ -19,7 +19,7 @@ package io.v47.jaffree.utils
 
 private val hexChars = "abcdef0123456789".toCharArray()
 
-fun generateRandomId(length: Int = 8) =
+internal fun generateRandomId(length: Int = 8) =
     buildString {
         (0..<length).forEach { _ ->
             append(hexChars.random())

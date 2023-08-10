@@ -37,7 +37,7 @@ private val logLevels =
         "fatal" to LogLevel.FATAL
     )
 
-fun parseLogMessage(line: String): LogMessage? {
+internal fun parseLogMessage(line: String): LogMessage? {
     val (logLevel, textRange) = findLogLevel(line) ?: return null
 
     val message = "${line.substring(0, textRange.first)}${line.substring(textRange.last + 1)}"

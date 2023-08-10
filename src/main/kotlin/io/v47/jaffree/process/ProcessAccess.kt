@@ -17,10 +17,23 @@
 
 package io.v47.jaffree.process
 
+/**
+ * Gives access to some process properties and functions.
+ */
 interface ProcessAccess {
+    /**
+     * The OS id of the process
+     */
     val pid: Int
 
+    /**
+     * Forcefully stops the running process. This may lead to data loss!
+     */
     fun stopForcefully()
 
+    /**
+     * Sends the quit signal to FFmpeg to let it perform proper clean-up operations after
+     * properly stopping its internal processes.
+     */
     fun stopGracefully()
 }

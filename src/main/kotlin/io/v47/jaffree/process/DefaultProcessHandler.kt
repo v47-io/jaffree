@@ -21,7 +21,7 @@ import com.zaxxer.nuprocess.NuProcess
 import com.zaxxer.nuprocess.NuProcessHandler
 import java.nio.ByteBuffer
 
-open class DefaultProcessHandler : NuProcessHandler {
+internal open class DefaultProcessHandler : NuProcessHandler {
     override fun onPreStart(nuProcess: NuProcess) = Unit
     override fun onStart(nuProcess: NuProcess) = Unit
     override fun onExit(exitCode: Int) = Unit

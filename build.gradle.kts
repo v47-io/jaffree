@@ -1,5 +1,8 @@
 import name.remal.gradle_plugins.plugins.publish.ossrh.RepositoryHandlerOssrhExtension
 import org.gradle.api.JavaVersion.VERSION_11
+import org.jetbrains.dokka.DokkaConfiguration
+import org.jetbrains.dokka.Platform
+import org.jetbrains.dokka.gradle.DokkaTask
 import java.util.*
 
 plugins {
@@ -10,6 +13,7 @@ plugins {
 
     alias(libs.plugins.license)
 
+    alias(libs.plugins.dokka)
     alias(libs.plugins.release)
     `maven-publish`
     alias(libs.plugins.mavenPublishOssrh) apply false
@@ -87,6 +91,23 @@ jacoco {
     maxFailures = 0
 }*/
 
+tasks.withType<DokkaTask>().configureEach {
+    dokkaSourceSets {
+        configureEach {
+            documentedVisibilities.set(setOf(DokkaConfiguration.Visibility.PUBLIC))
+            jdkVersion.set(11)
+            includes.from(project.files(), "packages.md")
+            platform.set(Platform.jvm)
+        }
+    }
+}
+
+val dokkaJavadoc = tasks.register<Jar>("dokkaJavadocJar") {
+    dependsOn(tasks.dokkaJavadoc)
+    from(tasks.dokkaJavadoc.flatMap { it.outputDirectory })
+    archiveClassifier.set("javadoc")
+}
+
 val sourcesJar by tasks.registering(Jar::class) {
     archiveClassifier.set("sources")
     from(sourceSets.main.get().allSource)
@@ -105,7 +126,7 @@ publishing {
                 classifier = "sources"
             }
 
-            artifact(tasks.javadoc) {
+            artifact(dokkaJavadoc) {
                 classifier = "javadoc"
             }
 

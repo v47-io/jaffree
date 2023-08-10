@@ -20,7 +20,7 @@ package io.v47.jaffree.process
 import com.github.kokorin.jaffree.log.LogMessage
 import java.nio.ByteBuffer
 
-interface JaffreeProcessHandler<R> {
+internal interface JaffreeProcessHandler<R> {
     val result: R?
     val exception: Exception?
 

@@ -1,6 +1,7 @@
 [versions]
 annotations = "24.0.1"
 commons-io = "2.13.0"
+dokka = "1.8.20"
 junitJupiter = "5.10.0"
 kotlin = "1.9.0"
 license = "0.16.1"
@@ -23,6 +24,7 @@ nuprocess = { module = "com.zaxxer:nuprocess", version.ref = "nuprocess" }
 slf4j = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
 
 [plugins]
+dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
 kotlinJvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 license = { id = "com.github.hierynomus.license", version.ref = "license" }
 mavenPublishOssrh = { id = "name.remal.maven-publish-ossrh", version.ref = "maven-publish-ossrh" }

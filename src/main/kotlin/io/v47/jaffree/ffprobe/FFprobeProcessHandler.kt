@@ -28,7 +28,7 @@ import java.io.ByteArrayOutputStream
 
 private val ffprobeLogger = LoggerFactory.getLogger(FFprobe::class.java)!!
 
-class FFprobeProcessHandler(
+internal class FFprobeProcessHandler(
     private val parser: FormatParser
 ) : LinesProcessHandler<FFprobeResult>() {
     private var contentWritten = false
