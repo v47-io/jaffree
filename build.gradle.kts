@@ -5,6 +5,16 @@ import org.jetbrains.dokka.Platform
 import org.jetbrains.dokka.gradle.DokkaTask
 import java.util.*
 
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath(libs.remalGradlePlugins)
+    }
+}
+
 plugins {
     alias(libs.plugins.kotlinJvm)
     checkstyle
@@ -16,7 +26,6 @@ plugins {
     alias(libs.plugins.dokka)
     alias(libs.plugins.release)
     `maven-publish`
-    alias(libs.plugins.mavenPublishOssrh) apply false
 }
 
 repositories {
@@ -173,7 +182,7 @@ val ossrhPass: String? = project.findProperty("osshrPass") as? String ?: System.
 
 if (!ossrhUser.isNullOrBlank() && !ossrhPass.isNullOrBlank() && !"${project.version}".endsWith("-SNAPSHOT")) {
     apply(plugin = "signing")
-    apply(plugin = libs.plugins.mavenPublishOssrh.get().pluginId)
+    apply(plugin = "name.remal.maven-publish-ossrh")
 
     publishing {
         repositories {

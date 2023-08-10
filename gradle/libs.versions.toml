@@ -6,10 +6,10 @@ junitJupiter = "5.10.0"
 kotlin = "1.9.0"
 license = "0.16.1"
 logback = "1.4.8"
-maven-publish-ossrh = "1.5.0"
 nanojson = "1.8"
 nuprocess = "2.0.6"
 release = "3.0.2"
+remal-gradle-plugins = "1.9.2"
 slf4j = "2.0.7"
 
 [libraries]
@@ -21,11 +21,11 @@ junitParams = { module = "org.junit.jupiter:junit-jupiter-params", version.ref =
 logback = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
 nanojson = { module = "com.grack:nanojson", version.ref = "nanojson" }
 nuprocess = { module = "com.zaxxer:nuprocess", version.ref = "nuprocess" }
+remalGradlePlugins = { module = "name.remal:gradle-plugins", version.ref = "remal-gradle-plugins" }
 slf4j = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
 
 [plugins]
 dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
 kotlinJvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 license = { id = "com.github.hierynomus.license", version.ref = "license" }
-mavenPublishOssrh = { id = "name.remal.maven-publish-ossrh", version.ref = "maven-publish-ossrh" }
 release = { id = "net.researchgate.release", version.ref = "release" }
