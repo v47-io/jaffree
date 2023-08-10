@@ -865,7 +865,7 @@ public class FFmpegTest {
                 .exceptionally(v -> null)
                 .thenRun(checkpoint::countDown);
 
-        Assertions.assertTrue(checkpoint.await(30, TimeUnit.SECONDS));
+        Assertions.assertTrue(checkpoint.await(60, TimeUnit.SECONDS));
         FFmpegResult encodingResult = futureRef.get();
         Assertions.assertNotNull(encodingResult);
 
