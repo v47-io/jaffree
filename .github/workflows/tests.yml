@@ -23,7 +23,7 @@ jobs:
     strategy:
       matrix:
         os: [ ubuntu-latest, macos-latest, windows-latest ]
-        java-version: [ 17 ]
+        java-version: [ 11, 17 ]
       fail-fast: false
 
     steps:
@@ -39,20 +39,20 @@ jobs:
         uses: actions/cache@v3
         with:
           path: .artifacts
-          key: ${{ runner.os }}-artifacts-${{ hashFiles('**/Artifacts.java') }}
+          key: artifacts-${{ hashFiles('**/Artifacts.java') }}
 
-      - name: Setup FFmpeg (${{ runner.os }})
+      - name: Setup FFmpeg (${{ runner.os }}, JDK ${{ matrix.java-version }})
         uses: FedericoCarboni/setup-ffmpeg@v2
 
-      - name: Build (${{ runner.os }})
+      - name: Build (${{ runner.os }}, JDK ${{ matrix.java-version }})
         uses: burrunan/gradle-cache-action@v1
         with:
           arguments: --console=plain build
 
-      - name: Test Report (${{ runner.os }})
+      - name: Test Report (${{ runner.os }}, JDK ${{ matrix.java-version }})
         uses: dorny/test-reporter@v1
         if: success() || failure()
         with:
-          name: Test Report (${{ runner.os }}, ${{ matrix.java-version }})
+          name: Test Report (${{ runner.os }}, JDK ${{ matrix.java-version }})
           reporter: java-junit
           path: '**/TEST-*.xml'

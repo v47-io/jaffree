@@ -29,7 +29,7 @@ outlook that tries to maintain 99% API compatibility with the original.
 
 ## Dependencies
 
-- JDK 17
+- JDK 11
 - FFmpeg 4+
 
 ## License
@@ -45,7 +45,7 @@ distributed under the GNU General Public License Version 3.
 
 **OS**: Ubuntu, MacOS, Windows
 
-**JDK**: 17 (and soon 21)
+**JDK**: 11, 17 (and soon 21)
 
 [actions]: https://github.com/v47-io/jaffree/blob/master/.github/workflows/tests.yml
 

@@ -55,8 +55,8 @@ public class NegotiatingTcpServer extends TcpServer implements ProcessAccessor {
      */
     @Override
     public void setProcessAccess(@NotNull final ProcessAccess processAccess) {
-        if (negotiator instanceof ProcessAccessor ac) {
-            ac.setProcessAccess(processAccess);
+        if (negotiator instanceof ProcessAccessor) {
+            ((ProcessAccessor) negotiator).setProcessAccess(processAccess);
         }
     }
 

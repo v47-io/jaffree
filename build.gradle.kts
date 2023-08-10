@@ -1,5 +1,5 @@
 import name.remal.gradle_plugins.plugins.publish.ossrh.RepositoryHandlerOssrhExtension
-import org.gradle.api.JavaVersion.VERSION_17
+import org.gradle.api.JavaVersion.VERSION_11
 import java.util.*
 
 plugins {
@@ -34,11 +34,11 @@ dependencies {
     testRuntimeOnly(libs.junitEngine)
 }
 
-java.sourceCompatibility = VERSION_17
-java.targetCompatibility = VERSION_17
+java.sourceCompatibility = VERSION_11
+java.targetCompatibility = VERSION_11
 
 kotlin {
-    jvmToolchain(17)
+    jvmToolchain(11)
 }
 
 tasks.compileKotlin {

@@ -27,12 +27,12 @@ jobs:
       - name: Setup FFmpeg (${{ runner.os }})
         uses: FedericoCarboni/setup-ffmpeg@v2
 
-      - name: Build and test using gradle
+      - name: Build and test using gradle (${{ runner.os }})
         uses: burrunan/gradle-cache-action@v1
         with:
           arguments: --console=plain build
 
-      - name: Publish to Central Repository
+      - name: Publish to Central Repository (${{ runner.os }})
         uses: burrunan/gradle-cache-action@v1
         with:
           arguments: --console=plain publish releaseNexusRepositories
