@@ -16,7 +16,9 @@
  */
 package io.v47.jaffree.process
 
+import com.github.kokorin.jaffree.LogLevel
 import com.github.kokorin.jaffree.log.LogMessage
+import org.slf4j.Logger
 import java.nio.ByteBuffer
 import kotlin.concurrent.Volatile
 
@@ -42,6 +44,11 @@ abstract class LinesProcessHandler<R> : JaffreeProcessHandler<R> {
     private val currentStderrBytes = mutableListOf<ByteArray>()
     private val currentStdoutBytes = mutableListOf<ByteArray>()
 
+    protected var finalErrorMessage: String? = null
+
+    private var lastLogLevel: LogLevel? = null
+    private var lastLogMessageBuilder: StringBuilder? = null
+
     override fun onStderr(buffer: ByteBuffer, closed: Boolean) {
         while (buffer.hasRemaining()) {
             if (addToBytes(buffer, currentStderrBytes) && currentStderrBytes.isNotEmpty()) {
@@ -66,12 +73,50 @@ abstract class LinesProcessHandler<R> : JaffreeProcessHandler<R> {
             onStdoutLine(String(currentStdoutBytes.join()))
     }
 
-    protected fun addErrorLogMessage(message: LogMessage) {
-        errorLogMessages.add(message)
-    }
-
     abstract fun onStderrLine(line: String)
     abstract fun onStdoutLine(line: String)
+
+    protected fun startLogMessage(logMessage: LogMessage) {
+        lastLogLevel = logMessage.logLevel
+        lastLogMessageBuilder = StringBuilder(logMessage.message.trim())
+    }
+
+    protected fun appendOrLogLine(logger: Logger, line: String) {
+        lastLogMessageBuilder?.append('\n')?.append(line) ?: logger.info(line)
+    }
+
+    protected fun processLastLogMessage(
+        logger: Logger,
+        additionalAction: ((LogLevel, String) -> Unit)? = null
+    ) {
+        val logLevel = lastLogLevel
+        if (logLevel != null) {
+            val message = "$lastLogMessageBuilder"
+
+            when (logLevel) {
+                LogLevel.TRACE -> logger.trace(message)
+
+                LogLevel.VERBOSE,
+                LogLevel.DEBUG -> logger.debug(message)
+
+                LogLevel.INFO -> logger.info(message)
+                LogLevel.WARNING -> logger.warn(message)
+
+                LogLevel.QUIET,
+                LogLevel.PANIC,
+                LogLevel.FATAL,
+                LogLevel.ERROR -> {
+                    logger.error(message)
+                    errorLogMessages.add(LogMessage(logLevel, message))
+                }
+            }
+
+            if (logLevel.isErrorOrHigher)
+                finalErrorMessage = message
+
+            additionalAction?.invoke(logLevel, message)
+        }
+    }
 }
 
 private fun addToBytes(source: ByteBuffer, target: MutableList<ByteArray>): Boolean {

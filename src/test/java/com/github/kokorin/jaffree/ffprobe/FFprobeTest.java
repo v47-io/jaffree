@@ -26,7 +26,6 @@ import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -717,7 +716,7 @@ public class FFprobeTest {
                     "Process execution has ended with non-zero status: 1. Check logs for detailed error message.",
                     e.getMessage());
             assertEquals(1, e.getProcessErrorLogMessages().size());
-            assertEquals("[error] nonexistent.mp4: No such file or directory",
+            assertEquals("nonexistent.mp4: No such file or directory",
                     e.getProcessErrorLogMessages().get(0).message);
             return;
         }
@@ -867,7 +866,7 @@ public class FFprobeTest {
 
     @TestAllParsers
     public void testAsyncExecutionWithException(FormatParser formatParser) throws Exception {
-        var exception = Assertions.assertThrows(ExecutionException.class,
+        var exception = Assertions.assertThrows(JaffreeAbnormalExitException.class,
                 () -> FFprobe.atPath(Config.FFMPEG_BIN)
                         .setShowStreams(true)
                         .setInput("non_existent.mp4")

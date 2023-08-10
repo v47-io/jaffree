@@ -20,7 +20,7 @@ package com.github.kokorin.jaffree.process;
 import java.io.Closeable;
 
 /**
- * Interface to be implemented by and ffmpeg/ffprobe helpers which must be ran in parallel to
+ * Interface to be implemented by and ffmpeg/ffprobe helpers which must be run in parallel to
  * ffprobe/ffmpeg process.
  */
 public interface ProcessHelper extends Runnable, Closeable {

@@ -21,9 +21,9 @@ import com.github.kokorin.jaffree.LogLevel;
 import com.github.kokorin.jaffree.StreamType;
 import com.github.kokorin.jaffree.ffprobe.data.FormatParser;
 import com.github.kokorin.jaffree.ffprobe.data.JsonFormatParser;
-import com.github.kokorin.jaffree.process.ProcessHandler;
-import com.github.kokorin.jaffree.process.ProcessHelper;
-import com.github.kokorin.jaffree.process.StdReader;
+import io.v47.jaffree.ffprobe.FFprobeProcessHandler;
+import io.v47.jaffree.process.ProcessFuture;
+import io.v47.jaffree.process.ProcessRunner;
 
 import java.io.InputStream;
 import java.nio.channels.SeekableByteChannel;
@@ -32,9 +32,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -504,28 +501,6 @@ public class FFprobe {
     }
 
     /**
-     * Starts asynchronous ffprobe execution.
-     *
-     * @return ffprobe result future
-     */
-    public Future<FFprobeResult> executeAsync() {
-        FutureTask<FFprobeResult> resultFuture = new FutureTask<>(
-                new Callable<FFprobeResult>() {
-                    @Override
-                    public FFprobeResult call() throws Exception {
-                        return execute();
-                    }
-                }
-        );
-
-        Thread runner = new Thread(resultFuture, "FFprobe-async-runner");
-        runner.setDaemon(true);
-        runner.start();
-
-        return resultFuture;
-    }
-
-    /**
      * Starts synchronous ffprobe execution.
      * <p>
      * Current thread is blocked until ffprobe is finished.
@@ -533,20 +508,28 @@ public class FFprobe {
      * @return ffprobe result
      */
     public FFprobeResult execute() {
-        List<ProcessHelper> helpers = new ArrayList<>();
+        return executeAsync().get();
+    }
+
+    /**
+     * Starts asynchronous ffprobe execution.
+     *
+     * @return ffprobe result future
+     */
+    public ProcessFuture<FFprobeResult> executeAsync() {
+        var helpers = new ArrayList<Runnable>();
         if (input != null) {
-            ProcessHelper helper = input.helperThread();
+            var helper = input.helperThread();
             if (helper != null) {
                 helpers.add(helper);
             }
         }
 
-        return new ProcessHandler<FFprobeResult>(executable, null)
-                .setStdOutReader(createStdOutReader(formatParser))
-                .setStdErrReader(createStdErrReader())
-                .setHelpers(helpers)
+        return new ProcessRunner<>(executable,
+                new FFprobeProcessHandler(formatParser))
                 .setArguments(buildArguments())
-                .execute();
+                .setHelpers(helpers)
+                .executeAsync();
     }
 
     /**
@@ -636,30 +619,6 @@ public class FFprobe {
         }
 
         return result;
-    }
-
-    /**
-     * Creates {@link StdReader} which is used to read ffprobe stdout.
-     * <p>
-     * Note: default implementation uses {@link FormatParser} to parse output.
-     *
-     * @param formatParser format parser to use
-     * @return this
-     */
-    @SuppressWarnings("checkstyle:HiddenField")
-    protected StdReader<FFprobeResult> createStdOutReader(final FormatParser formatParser) {
-        return new FFprobeResultReader(formatParser);
-    }
-
-    /**
-     * Creates {@link StdReader} which is used to read ffprobe stderr.
-     * <p>
-     * Note: default implementation simply logs everything with SLF4J.
-     *
-     * @return this
-     */
-    protected StdReader<FFprobeResult> createStdErrReader() {
-        return new FFprobeLogReader();
     }
 
     /**

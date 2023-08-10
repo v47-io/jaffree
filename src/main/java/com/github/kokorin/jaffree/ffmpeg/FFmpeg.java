@@ -33,11 +33,9 @@
 
 package com.github.kokorin.jaffree.ffmpeg;
 
-import com.github.kokorin.jaffree.JaffreeException;
 import com.github.kokorin.jaffree.LogLevel;
 import com.github.kokorin.jaffree.StreamType;
 import com.github.kokorin.jaffree.net.NegotiatingTcpServer;
-import com.github.kokorin.jaffree.process.JaffreeAbnormalExitException;
 import com.github.kokorin.jaffree.process.ProcessHelper;
 import io.v47.jaffree.ffmpeg.FFmpegProcessHandler;
 import io.v47.jaffree.process.ProcessFuture;
@@ -49,11 +47,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 
 /**
  * {@link FFmpeg} provides an ability to start &amp; stop ffmpeg process and keep track of
@@ -411,28 +407,7 @@ public class FFmpeg {
      * @return ffmpeg result
      */
     public FFmpegResult execute() {
-        try {
-            return executeAsync().get();
-        } catch (InterruptedException e) {
-            throw new JaffreeException("Failed to execute, was interrupted", e);
-        } catch (ExecutionException e) {
-            RuntimeException x = new JaffreeAbnormalExitException(
-                    "Process execution has ended with non-zero status: 1. "
-                            + "Check logs for detailed error message.",
-                    Collections.emptyList());
-
-            if (e.getCause() != null) {
-                if (e.getCause() instanceof JaffreeAbnormalExitException jx) {
-                    x = jx;
-                } else {
-                    x.initCause(e.getCause());
-                }
-            } else {
-                x.initCause(e);
-            }
-
-            throw x;
-        }
+        return executeAsync().get();
     }
 
     /**

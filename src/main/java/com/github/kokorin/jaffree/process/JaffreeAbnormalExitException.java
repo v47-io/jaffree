@@ -26,7 +26,7 @@ import java.util.List;
  * Non-zero status code exit exception which includes all error messages produced by the process.
  */
 public class JaffreeAbnormalExitException extends JaffreeException {
-    private List<LogMessage> processErrorLogMessages;
+    private final List<LogMessage> processErrorLogMessages;
 
     /**
      * Constructs a new {@link JaffreeAbnormalExitException} with the specified detail message

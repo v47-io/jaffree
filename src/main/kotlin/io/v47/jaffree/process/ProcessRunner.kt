@@ -106,19 +106,13 @@ class ProcessRunner<T>(
                     it.get()
                 }
 
-                if (status != 0 && processHandler.exception != null)
-                    throw JaffreeAbnormalExitException(
-                        "Execution failed with exception",
-                        processHandler.errorLogMessages
-                    )
-                        .also { it.initCause(processHandler.exception) }
-
                 if (status != 0)
                     throw JaffreeAbnormalExitException(
-                        "Process execution has ended with non-zero status: $status. " +
-                                "Check logs for detailed error message.",
+                        errorExceptionMessage(status),
                         processHandler.errorLogMessages
-                    )
+                    ).also {
+                        processHandler.exception?.let { x -> it.initCause(x) }
+                    }
 
                 processHandler.result
                     ?: throw NullPointerException("The result must not be null")
@@ -134,4 +128,8 @@ class ProcessRunner<T>(
             processAccess
         )
     }
+
+    private fun errorExceptionMessage(status: Int) =
+        "Process execution has ended with non-zero status: $status. " +
+                "Check logs for detailed error message."
 }

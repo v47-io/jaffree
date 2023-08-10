@@ -16,7 +16,14 @@
  */
 package io.v47.jaffree.process
 
-import java.util.concurrent.*
+import com.github.kokorin.jaffree.JaffreeException
+import com.github.kokorin.jaffree.process.JaffreeAbnormalExitException
+import java.util.concurrent.CompletableFuture
+import java.util.concurrent.CompletionStage
+import java.util.concurrent.ExecutionException
+import java.util.concurrent.Executor
+import java.util.concurrent.Future
+import java.util.concurrent.TimeUnit
 import java.util.function.BiConsumer
 import java.util.function.BiFunction
 import java.util.function.Consumer
@@ -32,6 +39,10 @@ interface ProcessFuture<T> : Future<T>, CompletionStage<T> {
     }
 
     val processAccess: ProcessAccess
+
+    override fun get(): T
+
+    override fun get(timeout: Long, unit: TimeUnit): T
 }
 
 @Suppress("TooManyFunctions")
@@ -52,9 +63,21 @@ private class ProcessFutureImpl<T>(
 
     override fun isDone() = delegate.isDone
 
-    override fun get(): T = delegate.get()
+    override fun get(): T =
+        get(Long.MAX_VALUE, TimeUnit.MILLISECONDS)
 
-    override fun get(timeout: Long, unit: TimeUnit): T = delegate.get(timeout, unit)
+    @Suppress("SwallowedException")
+    override fun get(timeout: Long, unit: TimeUnit): T =
+        try {
+            delegate.get(timeout, unit)
+        } catch (e: InterruptedException) {
+            throw JaffreeException("Failed to execute, was interrupted", e)
+        } catch (e: ExecutionException) {
+            if (e.cause is JaffreeAbnormalExitException)
+                throw e.cause!!
+            else
+                throw e
+        }
 
     override fun <U> thenApply(fn: Function<in T, out U>): CompletionStage<U> =
         ProcessFutureImpl(delegate.thenApply(fn), processAccess)
