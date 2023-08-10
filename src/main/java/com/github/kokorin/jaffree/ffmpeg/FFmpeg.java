@@ -417,7 +417,8 @@ public class FFmpeg {
             throw new JaffreeException("Failed to execute, was interrupted", e);
         } catch (ExecutionException e) {
             RuntimeException x = new JaffreeAbnormalExitException(
-                    "Process execution has ended with non-zero status: 1. Check logs for detailed error message.",
+                    "Process execution has ended with non-zero status: 1. "
+                            + "Check logs for detailed error message.",
                     Collections.emptyList());
 
             if (e.getCause() != null) {

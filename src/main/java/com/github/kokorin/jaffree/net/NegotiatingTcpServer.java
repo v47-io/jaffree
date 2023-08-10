@@ -48,8 +48,13 @@ public class NegotiatingTcpServer extends TcpServer implements ProcessAccessor {
         negotiator.negotiate(socket);
     }
 
+    /**
+     * Sets the ProcessAccess used by the current process.
+     *
+     * @param processAccess gives access to the current process
+     */
     @Override
-    public void setProcessAccess(@NotNull ProcessAccess processAccess) {
+    public void setProcessAccess(@NotNull final ProcessAccess processAccess) {
         if (negotiator instanceof ProcessAccessor ac) {
             ac.setProcessAccess(processAccess);
         }

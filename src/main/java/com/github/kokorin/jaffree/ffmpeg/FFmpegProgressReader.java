@@ -61,7 +61,8 @@ public class FFmpegProgressReader implements TcpNegotiator, ProcessAccessor {
     }
 
     /**
-     * Set's the ProcessAccess of the currently running process for which progress is being reported.
+     * Set's the ProcessAccess of the currently running process for which progress
+     * is being reported.
      *
      * @param processAccess gives access to the process for which progress is being reported.
      */
