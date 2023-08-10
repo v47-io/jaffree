@@ -38,6 +38,10 @@ All existing code previous to the fork remains available under the Apache Licens
 All subsequent changes, entirely new code, and any artifacts based on this fork are licensed and
 distributed under the GNU General Public License Version 3.
 
+## Contributing
+
+Read [this](./CONTRIBUTING.md) to see how you can properly contribute, if you wish to do so.
+
 ## Tested with the help of [GitHub Actions][actions]
 
 ![Tests][badge]
