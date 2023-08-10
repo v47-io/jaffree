@@ -132,7 +132,7 @@ publishing {
 
             pom {
                 name.set("Jaffree")
-                description.set("Java ffmpeg and ffprobe command-line wrapper ")
+                description.set("Java ffmpeg and ffprobe command-line wrapper")
                 url.set("https://github.com/v47-io/jaffree")
 
                 licenses {
