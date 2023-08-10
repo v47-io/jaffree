@@ -48,8 +48,6 @@ Read [this](./CONTRIBUTING.md) to see how you can properly contribute, if you wi
 
 **OS**: Ubuntu, MacOS, Windows
 
-**JDK**: 11, 17 (and soon 21)
-
 [actions]: https://github.com/v47-io/jaffree/blob/master/.github/workflows/tests.yml
 
 [badge]: https://github.com/v47-io/jaffree/workflows/Tests/badge.svg
