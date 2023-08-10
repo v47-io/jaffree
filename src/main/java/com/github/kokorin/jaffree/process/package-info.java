@@ -16,6 +16,6 @@
  */
 
 /**
- * Some classes related to process handling
+ * Some classes related to process handling.
  */
 package com.github.kokorin.jaffree.process;
