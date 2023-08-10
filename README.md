@@ -20,12 +20,11 @@ outlook that tries to maintain 99% API compatibility with the original.
 
 - Revamped process execution using different method of launching processes
 - No more puller threads for process stdout and stderr (handled by NuProcess)
-- Using ForkJoinPool to run async tasks
-- Clean async API using Java Future
+- Proper async API using CompletionStage
 - Async FFprobe execution, not just FFmpeg
 - Using the latest versions of all dependencies and plugins
 - Gradle instead of Maven
-- JDK support starts at 11
+- JDK support starts at 11 (dropped support for Java 1.8)
 
 ## Dependencies
 
@@ -79,16 +78,16 @@ distributed under the GNU General Public License Version 3.
 See whole example [here](src/test/java/examples/ShowStreamsExample.java).
 
 ```java
-FFprobeResult result=FFprobe.atPath()
+FFprobeResult result = FFprobe.atPath()
         .setShowStreams(true)
         .setInput(pathToVideo)
         .execute();
 
-        for(Stream stream:result.getStreams()){
-        System.out.println("Stream #"+stream.getIndex()
-        +" type: "+stream.getCodecType()
-        +" duration: "+stream.getDuration()+" seconds");
-        }
+for (Stream stream : result.getStreams()) {
+    System.out.println("Stream #" + stream.getIndex()
+            + " type: " + stream.getCodecType()
+            + " duration: " + stream.getDuration() + " seconds");
+}
 ```
 
 ### Detecting exact media file duration
@@ -98,22 +97,22 @@ Sometimes ffprobe can't show exact duration, use ffmpeg trancoding to NULL outpu
 See whole example [here](src/test/java/examples/ExactDurationExample.java).
 
 ```java
-final AtomicLong durationMillis=new AtomicLong();
+final AtomicLong durationMillis = new AtomicLong();
 
-        FFmpegResult ffmpegResult=FFmpeg.atPath()
+FFmpegResult ffmpegResult = FFmpeg.atPath()
         .addInput(
-        UrlInput.fromUrl(pathToVideo)
+                UrlInput.fromUrl(pathToVideo)
         )
         .addOutput(new NullOutput())
-        .setProgressListener(new ProgressListener(){
-@Override
-public void onProgress(FFmpegProgress progress){
-        durationMillis.set(progress.getTimeMillis());
-        }
+        .setProgressListener(new ProgressListener() {
+            @Override
+            public void onProgress(FFmpegProgress progress, ProcessAccess processAccess) {
+                durationMillis.set(progress.getTimeMillis());
+            }
         })
         .execute();
 
-        System.out.println("Exact duration: "+durationMillis.get()+" milliseconds");
+System.out.println("Exact duration: " + durationMillis.get() + " milliseconds");
 ```
 
 ### Re-encode and track progress
@@ -121,30 +120,30 @@ public void onProgress(FFmpegProgress progress){
 See whole example [here](src/test/java/examples/ReEncodeExample.java).
 
 ```java
-final AtomicLong duration=new AtomicLong();
-        FFmpeg.atPath()
+final AtomicLong duration = new AtomicLong();
+FFmpeg.atPath()
         .addInput(UrlInput.fromUrl(pathToSrc))
         .setOverwriteOutput(true)
         .addOutput(new NullOutput())
-        .setProgressListener(new ProgressListener(){
-@Override
-public void onProgress(FFmpegProgress progress){
-        duration.set(progress.getTimeMillis());
-        }
+        .setProgressListener(new ProgressListener() {
+            @Override
+            public void onProgress(FFmpegProgress progress, ProcessAccess processAccess) {
+                duration.set(progress.getTimeMillis());
+            }
         })
         .execute();
 
-        FFmpeg.atPath()
+FFmpeg.atPath()
         .addInput(UrlInput.fromUrl(pathToSrc))
         .setOverwriteOutput(true)
-        .addArguments("-movflags","faststart")
+        .addArguments("-movflags", "faststart")
         .addOutput(UrlOutput.toUrl(pathToDst))
-        .setProgressListener(new ProgressListener(){
-@Override
-public void onProgress(FFmpegProgress progress){
-        double percents=100.*progress.getTimeMillis()/duration.get();
-        System.out.println("Progress: "+percents+"%");
-        }
+        .setProgressListener(new ProgressListener() {
+            @Override
+            public void onProgress(FFmpegProgress progress, ProcessAccess processAccess) {
+                double percents = 100. * progress.getTimeMillis() / duration.get();
+                System.out.println("Progress: " + percents + "%");
+            }
         })
         .execute();
 ```
@@ -158,16 +157,16 @@ See whole example [here](src/test/java/examples/CutAndScaleExample.java).
 ```java
 FFmpeg.atPath()
         .addInput(
-        UrlInput.fromUrl(pathToSrc)
-        .setPosition(10,TimeUnit.SECONDS)
-        .setDuration(42,TimeUnit.SECONDS)
+                UrlInput.fromUrl(pathToSrc)
+                        .setPosition(10, TimeUnit.SECONDS)
+                        .setDuration(42, TimeUnit.SECONDS)
         )
-        .setFilter(StreamType.VIDEO,"scale=160:-2")
+        .setFilter(StreamType.VIDEO, "scale=160:-2")
         .setOverwriteOutput(true)
-        .addArguments("-movflags","faststart")
+        .addArguments("-movflags", "faststart")
         .addOutput(
-        UrlOutput.toUrl(pathToDst)
-        .setPosition(10,TimeUnit.SECONDS)
+                UrlOutput.toUrl(pathToDst)
+                        .setPosition(10, TimeUnit.SECONDS)
         )
         .execute();
 ```
@@ -178,21 +177,21 @@ See whole example [here](src/test/java/examples/ParsingOutputExample.java).
 
 ```java
 // StringBuffer - because it's thread safe
-final StringBuffer loudnormReport=new StringBuffer();
+final StringBuffer loudnormReport = new StringBuffer();
 
-        FFmpeg.atPath()
+FFmpeg.atPath()
         .addInput(UrlInput.fromUrl(pathToVideo))
-        .addArguments("-af","loudnorm=I=-16:TP=-1.5:LRA=11:print_format=json")
+        .addArguments("-af", "loudnorm=I=-16:TP=-1.5:LRA=11:print_format=json")
         .addOutput(new NullOutput(false))
-        .setOutputListener(new OutputListener(){
-@Override
-public void onOutput(String line){
-        loudnormReport.append(line);
-        }
+        .setOutputListener(new OutputListener() {
+            @Override
+            public void onOutput(String line, ProcessAccess processAccess) {
+                loudnormReport.append(line);
+            }
         })
         .execute();
 
-        System.out.println("Loudnorm report:\n"+loudnormReport);
+System.out.println("Loudnorm report:\n" + loudnormReport);
 ```
 
 ### Supplying and consuming data with SeekableByteChannel
@@ -203,18 +202,18 @@ similar libraries. Under the hood Jaffree uses tiny FTP server to interact with 
 See whole example [here](src/test/java/examples/UsingChannelsExample.java).
 
 ```java
-try(SeekableByteChannel inputChannel=
-        Files.newByteChannel(pathToSrc,StandardOpenOption.READ);
-        SeekableByteChannel outputChannel=
-        Files.newByteChannel(pathToDst,StandardOpenOption.CREATE,
-        StandardOpenOption.WRITE,StandardOpenOption.READ,
-        StandardOpenOption.TRUNCATE_EXISTING)
-        ){
-        FFmpeg.atPath()
-        .addInput(ChannelInput.fromChannel(inputChannel))
-        .addOutput(ChannelOutput.toChannel(filename,outputChannel))
-        .execute();
-        }
+try (SeekableByteChannel inputChannel =
+             Files.newByteChannel(pathToSrc, StandardOpenOption.READ);
+     SeekableByteChannel outputChannel =
+             Files.newByteChannel(pathToDst, StandardOpenOption.CREATE,
+                     StandardOpenOption.WRITE, StandardOpenOption.READ,
+                     StandardOpenOption.TRUNCATE_EXISTING)
+) {
+    FFmpeg.atPath()
+            .addInput(ChannelInput.fromChannel(inputChannel))
+            .addOutput(ChannelOutput.toChannel(filename, outputChannel))
+            .execute();
+}
 ```
 
 ### Supplying and consuming data with InputStream and OutputStream
@@ -228,20 +227,20 @@ Under the hood pipes are not OS pipes, but TCP Sockets. This allows much higher 
 See whole example [here](src/test/java/examples/UsingStreamsExample.java).
 
 ```java
-try(InputStream inputStream=
-        Files.newInputStream(pathToSrc);
-        OutputStream outputStream=
-        Files.newOutputStream(pathToDst,StandardOpenOption.CREATE,
-        StandardOpenOption.WRITE,StandardOpenOption.TRUNCATE_EXISTING)
-        ){
-        FFmpeg.atPath()
-        .addInput(PipeInput.pumpFrom(inputStream))
-        .addOutput(
-        PipeOutput.pumpTo(outputStream)
-        .setFormat("flv")
-        )
-        .execute();
-        }
+try (InputStream inputStream =
+             Files.newInputStream(pathToSrc);
+     OutputStream outputStream =
+             Files.newOutputStream(pathToDst, StandardOpenOption.CREATE,
+                     StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING)
+) {
+    FFmpeg.atPath()
+            .addInput(PipeInput.pumpFrom(inputStream))
+            .addOutput(
+                    PipeOutput.pumpTo(outputStream)
+                            .setFormat("flv")
+            )
+            .execute();
+}
 ```
 
 ### Live Stream Re-Streaming (HLS)
@@ -251,19 +250,19 @@ See whole example [here](src/test/java/examples/ReStreamWithHls.java).
 ```java
 FFmpeg.atPath()
         .addInput(
-        UrlInput.fromUrl(liveStream)
+                UrlInput.fromUrl(liveStream)
         )
         .addOutput(
-        UrlOutput.toPath(dir.resolve("index.m3u8"))
-        .setFrameRate(30)
-        // check all available options: ffmpeg -help muxer=hls
-        .setFormat("hls")
-        // enforce keyframe every 2s - see setFrameRate
-        .addArguments("-x264-params","keyint=60")
-        .addArguments("-hls_list_size","5")
-        .addArguments("-hls_delete_threshold","5")
-        .addArguments("-hls_time","2")
-        .addArguments("-hls_flags","delete_segments")
+                UrlOutput.toPath(dir.resolve("index.m3u8"))
+                        .setFrameRate(30)
+                        // check all available options: ffmpeg -help muxer=hls
+                        .setFormat("hls")
+                        // enforce keyframe every 2s - see setFrameRate
+                        .addArguments("-x264-params", "keyint=60")
+                        .addArguments("-hls_list_size", "5")
+                        .addArguments("-hls_delete_threshold", "5")
+                        .addArguments("-hls_time", "2")
+                        .addArguments("-hls_flags", "delete_segments")
         )
         .setOverwriteOutput(true)
         .execute();
@@ -276,27 +275,27 @@ See whole example [here](src/test/java/examples/ScreenCaptureExample.java).
 ```java
 FFmpeg.atPath()
         .addInput(CaptureInput
-        .captureDesktop()
-        .setCaptureFrameRate(30)
-        .setCaptureCursor(true)
+                .captureDesktop()
+                .setCaptureFrameRate(30)
+                .setCaptureCursor(true)
         )
         .addOutput(UrlOutput
-        .toPath(pathToVideo)
-        // Record with ultrafast to lower CPU usage
-        .addArguments("-preset","ultrafast")
-        .setDuration(30,TimeUnit.SECONDS)
+                .toPath(pathToVideo)
+                // Record with ultrafast to lower CPU usage
+                .addArguments("-preset", "ultrafast")
+                .setDuration(30, TimeUnit.SECONDS)
         )
         .setOverwriteOutput(true)
         .execute();
 
 //Re-encode when record is completed to optimize file size 
-        Path pathToOptimized=pathToVideo.resolveSibling("optimized-"+pathToVideo.getFileName());
-        FFmpeg.atPath()
+Path pathToOptimized = pathToVideo.resolveSibling("optimized-" + pathToVideo.getFileName());
+FFmpeg.atPath()
         .addInput(UrlInput.fromPath(pathToVideo))
         .addOutput(UrlOutput.toPath(pathToOptimized))
         .execute();
 
-        Files.move(pathToOptimized,pathToVideo,StandardCopyOption.REPLACE_EXISTING);
+Files.move(pathToOptimized, pathToVideo, StandardCopyOption.REPLACE_EXISTING);
 ```
 
 ### Produce Video in Pure Java Code
@@ -306,38 +305,38 @@ Check also more [advanced example](src/test/java/examples/BouncingBallExample.ja
 both audio and video
 
 ```java
-FrameProducer producer=new FrameProducer(){
-private long frameCounter=0;
+FrameProducer producer = new FrameProducer() {
+    private long frameCounter = 0;
 
-@Override
-public List<Stream> produceStreams(){
+    @Override
+    public List<Stream> produceStreams() {
         return Collections.singletonList(new Stream()
-        .setType(Stream.Type.VIDEO)
-        .setTimebase(1000L)
-        .setWidth(320)
-        .setHeight(240)
+                .setType(Stream.Type.VIDEO)
+                .setTimebase(1000L)
+                .setWidth(320)
+                .setHeight(240)
         );
+    }
+
+    @Override
+    public Frame produce() {
+        if (frameCounter > 30) {
+            return null; // return null when End of Stream is reached
         }
 
-@Override
-public Frame produce(){
-        if(frameCounter>30){
-        return null; // return null when End of Stream is reached
-        }
-
-        BufferedImage image=new BufferedImage(320,240,BufferedImage.TYPE_3BYTE_BGR);
-        Graphics2D graphics=image.createGraphics();
-        graphics.setPaint(new Color(frameCounter*1.0f/30,0,0));
-        graphics.fillRect(0,0,320,240);
-        long pts=frameCounter*1000/10; // Frame PTS in Stream Timebase
-        Frame videoFrame=Frame.createVideoFrame(0,pts,image);
+        BufferedImage image = new BufferedImage(320, 240, BufferedImage.TYPE_3BYTE_BGR);
+        Graphics2D graphics = image.createGraphics();
+        graphics.setPaint(new Color(frameCounter * 1.0f / 30, 0, 0));
+        graphics.fillRect(0, 0, 320, 240);
+        long pts = frameCounter * 1000 / 10; // Frame PTS in Stream Timebase
+        Frame videoFrame = Frame.createVideoFrame(0, pts, image);
         frameCounter++;
 
         return videoFrame;
-        }
-        };
+    }
+};
 
-        FFmpeg.atPath()
+FFmpeg.atPath()
         .addInput(FrameInput.withProducer(producer))
         .addOutput(UrlOutput.toUrl(pathToVideo))
         .execute();
@@ -354,43 +353,43 @@ See whole example [here](src/test/java/examples/ExtractFramesExample.java).
 ```java
 FFmpeg.atPath()
         .addInput(UrlInput
-        .fromPath(pathToSrc)
+                .fromPath(pathToSrc)
         )
         .addOutput(FrameOutput
-        .withConsumer(
-        new FrameConsumer(){
-private long num=1;
+                .withConsumer(
+                        new FrameConsumer() {
+                            private long num = 1;
 
-@Override
-public void consumeStreams(List<Stream> streams){
-        // All stream type except video are disabled. just ignore
-        }
+                            @Override
+                            public void consumeStreams(List<Stream> streams) {
+                                // All stream type except video are disabled. just ignore
+                            }
 
-@Override
-public void consume(Frame frame){
-        // End of Stream
-        if(frame==null){
-        return;
-        }
+                            @Override
+                            public void consume(Frame frame) {
+                                // End of Stream
+                                if (frame == null) {
+                                    return;
+                                }
 
-        try{
-        String filename="frame_"+num+++".png";
-        Path output=pathToDstDir.resolve(filename);
-        ImageIO.write(frame.getImage(),"png",output.toFile());
-        }catch(Exception e){
-        e.printStackTrace();
-        }
-        }
-        }
-        )
-        // No more then 100 frames
-        .setFrameCount(StreamType.VIDEO,100L)
-        // 1 frame every 10 seconds
-        .setFrameRate(0.1)
-        // Disable all streams except video
-        .disableStream(StreamType.AUDIO)
-        .disableStream(StreamType.SUBTITLE)
-        .disableStream(StreamType.DATA)
+                                try {
+                                    String filename = "frame_" + num++ + ".png";
+                                    Path output = pathToDstDir.resolve(filename);
+                                    ImageIO.write(frame.getImage(), "png", output.toFile());
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        }
+                )
+                // No more then 100 frames
+                .setFrameCount(StreamType.VIDEO, 100L)
+                // 1 frame every 10 seconds
+                .setFrameRate(0.1)
+                // Disable all streams except video
+                .disableStream(StreamType.AUDIO)
+                .disableStream(StreamType.SUBTITLE)
+                .disableStream(StreamType.DATA)
         )
         .execute();
 ```
@@ -420,17 +419,16 @@ See whole examples [here](src/test/java/examples/StopExample.java).
 
 #### Grace stop
 
-Start ffmpeg with `FFmpeg#executeAsync` and stop it with `FFmpegResultFuture#graceStop` (ffmpeg
-only).
+Start ffmpeg with `FFmpeg#executeAsync` and stop it with `ProcessAccess#stopGracefully`.
 This will pass `q` symbol to ffmpeg's stdin.
 
 **Note** output media finalization may take some time - up to several seconds.
 
 ```java
-FFmpegResultFuture future=ffmpeg.executeAsync();
+ProcessFuture<FFmpegResult> future = ffmpeg.executeAsync();
 
-        Thread.sleep(5_000);
-        future.graceStop();
+Thread.sleep(5_000);
+future.getProcessAccess().stopGracefully();
 ```
 
 #### Force stop
@@ -444,41 +442,41 @@ It's very likely that produced media will be corrupted with force stop.
 
 ```java
 final AtomicBoolean stopped=new AtomicBoolean();
-        ffmpeg.setProgressListener(
-        new ProgressListener(){
-@Override
-public void onProgress(FFmpegProgress progress){
-        if(stopped.get()){
-        throw new RuntimeException("Stopped with exception!");
+ffmpeg.setProgressListener(
+    new ProgressListener(){
+        @Override
+        public void onProgress(FFmpegProgress progress, ProcessAccess processAccess){
+            if(stopped.get()){
+                throw new RuntimeException("Stopped with exception!");
+            }
         }
-        }
-        }
-        );
+    }
+);
 ```
 
 * Start ffmpeg with `FFmpeg#executeAsync` and stop it with `FFmpegResultFuture#forceStop` (ffmpeg
   only)
 
 ```java
-FFmpegResultFuture future=ffmpeg.executeAsync();
+ProcessFuture<FFmpegResult> future=ffmpeg.executeAsync();
 
-        Thread.sleep(5_000);
-        future.forceStop();
+Thread.sleep(5_000);
+future.getProcessAccess().stopForcefully();
 ```
 
 * Start ffmpeg with `FFmpeg#execute` (or ffprobe with `FFprobe#execute`) and interrupt thread
 
 ```java
 Thread thread=new Thread(){
-@Override
-public void run(){
+    @Override
+    public void run(){
         ffmpeg.execute();
-        }
-        };
-        thread.start();
+    }
+};
+thread.start();
 
-        Thread.sleep(5_000);
-        thread.interrupt();
+Thread.sleep(5_000);
+thread.interrupt();
 ```
 
 ### Java 8 Completion API
@@ -487,12 +485,12 @@ See whole examples [here](src/test/java/examples/CompletionExample.java).
 
 ```java
 ffmpeg.executeAsync().toCompletableFuture()
-        .thenAccept(res->{
+    .thenAccept(res->{
         // get the result of the operation when it is done
-        })
-        .exceptionally(ex->{
+    })
+    .exceptionally(ex->{
         // handle exceptions produced during operation
-        });
+    });
 ```
 
 ### Complex Filtergraph (mosaic video)
@@ -501,81 +499,81 @@ More details about this example can be found on ffmpeg
 wiki: [Create a mosaic out of several input videos][mosaic]
 
 ```java
-FFmpegResult result=FFmpeg.atPath(BIN)
-        .addInput(UrlInput.fromPath(VIDEO1_MP4).setDuration(10,TimeUnit.SECONDS))
-        .addInput(UrlInput.fromPath(VIDEO2_MP4).setDuration(10,TimeUnit.SECONDS))
-        .addInput(UrlInput.fromPath(VIDEO3_MP4).setDuration(10,TimeUnit.SECONDS))
-        .addInput(UrlInput.fromPath(VIDEO4_MP4).setDuration(10,TimeUnit.SECONDS))
+FFmpegResult result = FFmpeg.atPath(BIN)
+        .addInput(UrlInput.fromPath(VIDEO1_MP4).setDuration(10, TimeUnit.SECONDS))
+        .addInput(UrlInput.fromPath(VIDEO2_MP4).setDuration(10, TimeUnit.SECONDS))
+        .addInput(UrlInput.fromPath(VIDEO3_MP4).setDuration(10, TimeUnit.SECONDS))
+        .addInput(UrlInput.fromPath(VIDEO4_MP4).setDuration(10, TimeUnit.SECONDS))
 
         .setComplexFilter(FilterGraph.of(
-        FilterChain.of(
-        Filter.withName("nullsrc")
-        .addArgument("size","640x480")
-        .addOutputLink("base")
-        ),
-        FilterChain.of(
-        Filter.fromInputLink(StreamSpecifier.withInputIndexAndType(0,StreamType.ALL_VIDEO))
-        .setName("setpts")
-        .addArgument("PTS-STARTPTS"),
-        Filter.withName("scale")
-        .addArgument("320x240")
-        .addOutputLink("upperleft")
-        ),
-        FilterChain.of(
-        Filter.fromInputLink(StreamSpecifier.withInputIndexAndType(1,StreamType.ALL_VIDEO))
-        .setName("setpts")
-        .addArgument("PTS-STARTPTS"),
-        Filter.withName("scale")
-        .addArgument("320x240")
-        .addOutputLink("upperright")
-        ),
-        FilterChain.of(
-        Filter.fromInputLink(StreamSpecifier.withInputIndexAndType(2,StreamType.ALL_VIDEO))
-        .setName("setpts")
-        .addArgument("PTS-STARTPTS"),
-        Filter.withName("scale")
-        .addArgument("320x240")
-        .addOutputLink("lowerleft")
-        ),
-        FilterChain.of(
-        Filter.fromInputLink(StreamSpecifier.withInputIndexAndType(3,StreamType.ALL_VIDEO))
-        .setName("setpts")
-        .addArgument("PTS-STARTPTS"),
-        Filter.withName("scale")
-        .addArgument("320x240")
-        .addOutputLink("lowerright")
-        ),
-        FilterChain.of(
-        Filter.fromInputLink("base")
-        .addInputLink("upperleft")
-        .setName("overlay")
-        .addArgument("shortest","1")
-        .addOutputLink("tmp1")
-        ),
-        FilterChain.of(
-        Filter.fromInputLink("tmp1")
-        .addInputLink("upperright")
-        .setName("overlay")
-        //.addArgument("shortest", "1")
-        .addArgument("x","320")
-        .addOutputLink("tmp2")
-        ),
-        FilterChain.of(
-        Filter.fromInputLink("tmp2")
-        .addInputLink("lowerleft")
-        .setName("overlay")
-        //.addArgument("shortest", "1")
-        .addArgument("y","240")
-        .addOutputLink("tmp3")
-        ),
-        FilterChain.of(
-        Filter.fromInputLink("tmp3")
-        .addInputLink("lowerright")
-        .setName("overlay")
-        //.addArgument("shortest", "1")
-        .addArgument("x","320")
-        .addArgument("y","240")
-        )
+                FilterChain.of(
+                        Filter.withName("nullsrc")
+                                .addArgument("size", "640x480")
+                                .addOutputLink("base")
+                ),
+                FilterChain.of(
+                        Filter.fromInputLink(StreamSpecifier.withInputIndexAndType(0, StreamType.ALL_VIDEO))
+                                .setName("setpts")
+                                .addArgument("PTS-STARTPTS"),
+                        Filter.withName("scale")
+                                .addArgument("320x240")
+                                .addOutputLink("upperleft")
+                ),
+                FilterChain.of(
+                        Filter.fromInputLink(StreamSpecifier.withInputIndexAndType(1, StreamType.ALL_VIDEO))
+                                .setName("setpts")
+                                .addArgument("PTS-STARTPTS"),
+                        Filter.withName("scale")
+                                .addArgument("320x240")
+                                .addOutputLink("upperright")
+                ),
+                FilterChain.of(
+                        Filter.fromInputLink(StreamSpecifier.withInputIndexAndType(2, StreamType.ALL_VIDEO))
+                                .setName("setpts")
+                                .addArgument("PTS-STARTPTS"),
+                        Filter.withName("scale")
+                                .addArgument("320x240")
+                                .addOutputLink("lowerleft")
+                ),
+                FilterChain.of(
+                        Filter.fromInputLink(StreamSpecifier.withInputIndexAndType(3, StreamType.ALL_VIDEO))
+                                .setName("setpts")
+                                .addArgument("PTS-STARTPTS"),
+                        Filter.withName("scale")
+                                .addArgument("320x240")
+                                .addOutputLink("lowerright")
+                ),
+                FilterChain.of(
+                        Filter.fromInputLink("base")
+                                .addInputLink("upperleft")
+                                .setName("overlay")
+                                .addArgument("shortest", "1")
+                                .addOutputLink("tmp1")
+                ),
+                FilterChain.of(
+                        Filter.fromInputLink("tmp1")
+                                .addInputLink("upperright")
+                                .setName("overlay")
+                                //.addArgument("shortest", "1")
+                                .addArgument("x", "320")
+                                .addOutputLink("tmp2")
+                ),
+                FilterChain.of(
+                        Filter.fromInputLink("tmp2")
+                                .addInputLink("lowerleft")
+                                .setName("overlay")
+                                //.addArgument("shortest", "1")
+                                .addArgument("y", "240")
+                                .addOutputLink("tmp3")
+                ),
+                FilterChain.of(
+                        Filter.fromInputLink("tmp3")
+                                .addInputLink("lowerright")
+                                .setName("overlay")
+                                //.addArgument("shortest", "1")
+                                .addArgument("x", "320")
+                                .addArgument("y", "240")
+                )
         ))
 
         .addOutput(UrlOutput.toPath(outputPath))
