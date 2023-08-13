@@ -438,8 +438,8 @@ public class FFmpeg {
         }
 
         return new ProcessRunner<>(executable,
+                buildArguments(),
                 new FFmpegProcessHandler(outputListener))
-                .setArguments(buildArguments())
                 .setHelpers(helpers)
                 .executeAsync();
     }
@@ -470,7 +470,7 @@ public class FFmpeg {
      *
      * @return arguments list
      */
-    protected List<String> buildArguments() {
+    private List<String> buildArguments() {
 
         // "level" is required for ffmpeg to add [loglevel] to output lines
         String logLevelArgument = "level";

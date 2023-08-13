@@ -22,6 +22,11 @@ package io.v47.jaffree.process
  */
 interface ProcessAccess {
     /**
+     * Returns the full command line string used to start the process
+     */
+    val commandLine: String
+
+    /**
      * The OS id of the process
      */
     val pid: Int

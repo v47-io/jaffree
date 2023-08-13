@@ -22,7 +22,7 @@ import org.slf4j.LoggerFactory
 
 private val logger = LoggerFactory.getLogger(ProcessAccess::class.java)!!
 
-internal class ProcessAccessImpl : ProcessAccess {
+internal class ProcessAccessImpl(override val commandLine: String) : ProcessAccess {
     internal var process: NuProcess? = null
 
     override val pid: Int

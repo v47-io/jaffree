@@ -542,8 +542,8 @@ public class FFprobe {
         }
 
         return new ProcessRunner<>(executable,
+                buildArguments(),
                 new FFprobeProcessHandler(formatParser))
-                .setArguments(buildArguments())
                 .setHelpers(helpers)
                 .executeAsync();
     }
@@ -553,7 +553,7 @@ public class FFprobe {
      *
      * @return arguments list
      */
-    protected List<String> buildArguments() {
+    private List<String> buildArguments() {
         List<String> result = new ArrayList<>();
 
         // "level" is required for ffmpeg to add [loglevel] to output lines

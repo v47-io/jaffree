@@ -30,15 +30,10 @@ private val logger = LoggerFactory.getLogger(ProcessRunner::class.java)!!
 
 internal class ProcessRunner<T>(
     private val executable: Path,
+    private val arguments: List<String>,
     private val processHandler: JaffreeProcessHandler<T>
 ) {
-    private var arguments: List<String> = emptyList()
     private var helpers: List<Runnable> = emptyList()
-
-    fun setArguments(arguments: List<String>): ProcessRunner<T> {
-        this.arguments = arguments
-        return this
-    }
 
     fun setHelpers(helpers: List<Runnable>): ProcessRunner<T> {
         this.helpers = helpers
@@ -62,7 +57,7 @@ internal class ProcessRunner<T>(
             command.joinToString(" ") { if (' ' in it) "\"$it\"" else it }
         )
 
-        val processAccess = ProcessAccessImpl()
+        val processAccess = ProcessAccessImpl(command.joinToString(separator = " "))
 
         (processHandler as? ProcessAccessor)?.setProcessAccess(processAccess)
 
@@ -93,7 +88,7 @@ internal class ProcessRunner<T>(
 
                 val process = nuProcessBuilder.start()
 
-                logger.info("[{}] Waiting for process to finish", execTag)
+                logger.debug("[{}] Waiting for process to finish", execTag)
                 val status = process.waitFor(0, TimeUnit.SECONDS)
 
                 logger.info("[{}] Process finished with status: {}", execTag, status)
