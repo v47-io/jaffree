@@ -159,7 +159,13 @@ public class FFmpegProgressReader implements TcpNegotiator, ProcessAccessor {
                     dupFrames = null;
                     dropFrames = null;
                     speed = null;
-                    progressListener.onProgress(progress, processAccess);
+
+                    try {
+                        progressListener.onProgress(progress, processAccess);
+                    } catch (Exception e) {
+                        LOGGER.warn("Exception in progress listener", e);
+                    }
+
                     break;
                 default:
                     if (key.startsWith("stream_")) {

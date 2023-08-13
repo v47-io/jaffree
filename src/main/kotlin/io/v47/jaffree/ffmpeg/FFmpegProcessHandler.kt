@@ -78,7 +78,7 @@ internal class FFmpegProcessHandler(
             runCatching {
                 outputListener?.onOutput(message, processAccess)
             }.onFailure { x ->
-                ffmpegLogger.warn("Output listener failed with exception", x)
+                ffmpegLogger.warn("Exception in output listener", x)
             }
 
         val possibleResult = ParseUtil.parseResult(message)
