@@ -31,15 +31,9 @@ private val logger = LoggerFactory.getLogger(ProcessRunner::class.java)!!
 internal class ProcessRunner<T>(
     private val executable: Path,
     private val arguments: List<String>,
+    private val helpers: List<Runnable>,
     private val processHandler: JaffreeProcessHandler<T>
 ) {
-    private var helpers: List<Runnable> = emptyList()
-
-    fun setHelpers(helpers: List<Runnable>): ProcessRunner<T> {
-        this.helpers = helpers
-        return this
-    }
-
     @Suppress("LongMethod", "ThrowsCount")
     @Synchronized
     fun executeAsync(): ProcessFuture<T> {

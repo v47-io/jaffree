@@ -439,8 +439,8 @@ public class FFmpeg {
 
         return new ProcessRunner<>(executable,
                 buildArguments(),
+                helpers,
                 new FFmpegProcessHandler(outputListener))
-                .setHelpers(helpers)
                 .executeAsync();
     }
 

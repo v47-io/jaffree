@@ -543,8 +543,8 @@ public class FFprobe {
 
         return new ProcessRunner<>(executable,
                 buildArguments(),
+                helpers,
                 new FFprobeProcessHandler(formatParser))
-                .setHelpers(helpers)
                 .executeAsync();
     }
 
