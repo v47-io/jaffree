@@ -24,7 +24,7 @@ internal class DelegatingProcessHandler(
     private val delegate: JaffreeProcessHandler<*>,
     private val processAccess: ProcessAccessImpl
 ) : DefaultProcessHandler() {
-    override fun onStart(nuProcess: NuProcess) {
+    override fun onPreStart(nuProcess: NuProcess) {
         processAccess.process = nuProcess
     }
 

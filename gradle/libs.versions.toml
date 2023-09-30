@@ -1,16 +1,16 @@
 [versions]
 annotations = "24.0.1"
-commons-io = "2.13.0"
-dokka = "1.8.20"
+commons-io = "2.14.0"
+dokka = "1.9.0"
 junitJupiter = "5.10.0"
-kotlin = "1.9.0"
+kotlin = "1.9.10"
 license = "0.16.1"
-logback = "1.4.8"
+logback = "1.4.11"
 nanojson = "1.8"
 nuprocess = "2.0.6"
 release = "3.0.2"
 remal-gradle-plugins = "1.9.2"
-slf4j = "2.0.7"
+slf4j = "2.0.9"
 
 [libraries]
 annotations = { module = "org.jetbrains:annotations", version.ref = "annotations" }
