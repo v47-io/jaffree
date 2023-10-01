@@ -23,6 +23,7 @@ import io.v47.jaffree.utils.generateRandomId
 import org.slf4j.LoggerFactory
 import java.nio.file.Path
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.CompletionException
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
@@ -51,7 +52,7 @@ internal class ProcessRunner<T>(
             command.joinToString(" ") { if (' ' in it) "\"$it\"" else it }
         )
 
-        val processAccess = ProcessAccessImpl(command.joinToString(separator = " "))
+        val processAccess = ProcessAccessImpl(command.joinToString(separator = " "), execTag)
 
         (processHandler as? ProcessAccessor)?.setProcessAccess(processAccess)
 
@@ -74,18 +75,22 @@ internal class ProcessRunner<T>(
 
                 logger.info("[{}] Starting process: {}", execTag, executable)
 
-                val actualProcessHandler =
-                    DelegatingProcessHandler(processHandler, processAccess)
+                val actualProcessHandler = DelegatingProcessHandler(processHandler)
 
                 val nuProcessBuilder = NuProcessBuilder(actualProcessHandler, command)
                 nuProcessBuilder.environment()["AV_LOG_FORCE_NOCOLOR"] = "1"
 
                 val process = nuProcessBuilder.start()
+                    ?: throw JaffreeAbnormalExitException("Process failed to start", emptyList())
+
+                processAccess.process = process
 
                 logger.debug("[{}] Waiting for process to finish", execTag)
                 val status = process.waitFor(0, TimeUnit.SECONDS)
 
                 logger.info("[{}] Process finished with status: {}", execTag, status)
+
+                processAccess.process = null
 
                 helpers.forEach {
                     (it as? ProcessHelper)?.close()
@@ -107,7 +112,10 @@ internal class ProcessRunner<T>(
                     ?: throw NullPointerException("The result must not be null")
             }.whenComplete { result, x ->
                 if (x != null)
-                    logger.trace("[$execTag] Exception occurred", x)
+                    logger.trace(
+                        "[$execTag] Exception occurred",
+                        (x as? CompletionException)?.cause ?: x
+                    )
 
                 if (result != null)
                     logger.trace("[{}] Process produced result {}", execTag, result)

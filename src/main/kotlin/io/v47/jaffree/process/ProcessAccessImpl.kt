@@ -22,17 +22,20 @@ import org.slf4j.LoggerFactory
 
 private val logger = LoggerFactory.getLogger(ProcessAccess::class.java)!!
 
-internal class ProcessAccessImpl(override val commandLine: String) : ProcessAccess {
+internal class ProcessAccessImpl(
+    override val commandLine: String,
+    private val execTag: String
+) : ProcessAccess {
     internal var process: NuProcess? = null
 
     override val pid: Int
-        get() = process?.pid ?: error("process not set yet, can't retrieve PID")
+        get() = process?.pid ?: error("[$execTag] process not set, can't retrieve PID")
 
     override fun stopForcefully() {
         val process = process
 
         if (process == null)
-            logger.error("No process set yet, can't stop")
+            logger.error("[{}] No process set, can't stop", execTag)
         else if (process.isRunning)
             process.destroy(true)
     }
@@ -41,7 +44,7 @@ internal class ProcessAccessImpl(override val commandLine: String) : ProcessAcce
         val process = process
 
         if (process == null)
-            logger.error("No process set yet, can't stop")
+            logger.error("[{}] No process set, can't stop", execTag)
         else if (process.isRunning)
         // wantWrite will lead to onStdinReady of the DelegatingProcessHandler to be called.
         // Hopefully the implementation is sound and never calls this anywhere else.

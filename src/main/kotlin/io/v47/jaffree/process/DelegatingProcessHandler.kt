@@ -17,19 +17,12 @@
 
 package io.v47.jaffree.process
 
-import com.zaxxer.nuprocess.NuProcess
 import java.nio.ByteBuffer
 
 internal class DelegatingProcessHandler(
     private val delegate: JaffreeProcessHandler<*>,
-    private val processAccess: ProcessAccessImpl
 ) : DefaultProcessHandler() {
-    override fun onPreStart(nuProcess: NuProcess) {
-        processAccess.process = nuProcess
-    }
-
     override fun onExit(exitCode: Int) {
-        processAccess.process = null
         delegate.onExit()
     }
 
