@@ -100,16 +100,18 @@ internal class ProcessRunner<T>(
                     it.get()
                 }
 
+                val result = processHandler.await()
+
                 if (status != 0)
                     throw JaffreeAbnormalExitException(
                         errorExceptionMessage(status),
                         processHandler.errorLogMessages
                     ).also {
-                        processHandler.exception?.let { x -> it.initCause(x) }
+                        if (result.isFailure)
+                            it.addSuppressed(result.exceptionOrNull()!!)
                     }
 
-                processHandler.result
-                    ?: throw NullPointerException("The result must not be null")
+                result.getOrThrow()
             }.whenComplete { result, x ->
                 if (x != null)
                     logger.trace(

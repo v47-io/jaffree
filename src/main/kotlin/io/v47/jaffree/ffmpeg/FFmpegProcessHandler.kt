@@ -35,6 +35,7 @@ internal class FFmpegProcessHandler(
     private val outputListener: OutputListener?
 ) : LinesProcessHandler<FFmpegResult>(), ProcessAccessor {
     private lateinit var processAccess: ProcessAccess
+    private var possibleResult: FFmpegResult? = null
 
     override fun setProcessAccess(processAccess: ProcessAccess) {
         this.processAccess = processAccess
@@ -44,9 +45,9 @@ internal class FFmpegProcessHandler(
         if ("frame=" in line && "bitrate=" in line && "speed=" in line)
             return
 
-        val possibleResult = ParseUtil.parseResult(line)
-        if (possibleResult != null) {
-            result = possibleResult
+        val parseResult = ParseUtil.parseResult(line)
+        if (parseResult != null) {
+            possibleResult = parseResult
             finalErrorMessage = null
             return
         }
@@ -64,13 +65,13 @@ internal class FFmpegProcessHandler(
             appendOrLogLine(ffmpegLogger, line.trim())
     }
 
-    override fun onExit() {
+    override fun onExit(exitCode: Int) {
         processLastLogMessage(ffmpegLogger, ::handleLogMessage)
 
-        if (finalErrorMessage != null)
-            exception = JaffreeException(finalErrorMessage)
-        else if (result == null)
-            result = FFmpegResult(null, null, null, null, null, null)
+        if (exitCode != 0 && finalErrorMessage != null)
+            finishExceptionally(JaffreeException(finalErrorMessage))
+        else
+            finish(possibleResult ?: FFmpegResult(null, null, null, null, null, null))
     }
 
     private fun handleLogMessage(logLevel: LogLevel, message: String) {
@@ -81,9 +82,9 @@ internal class FFmpegProcessHandler(
                 ffmpegLogger.warn("Exception in output listener", x)
             }
 
-        val possibleResult = ParseUtil.parseResult(message)
-        if (possibleResult != null) {
-            result = possibleResult
+        val parseResult = ParseUtil.parseResult(message)
+        if (parseResult != null) {
+            possibleResult = parseResult
             finalErrorMessage = null
         }
     }

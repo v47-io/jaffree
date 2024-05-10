@@ -21,12 +21,11 @@ import com.github.kokorin.jaffree.log.LogMessage
 import java.nio.ByteBuffer
 
 internal interface JaffreeProcessHandler<R> {
-    val result: R?
-    val exception: Exception?
-
     val errorLogMessages: List<LogMessage>
 
     fun onStderr(buffer: ByteBuffer, closed: Boolean)
     fun onStdout(buffer: ByteBuffer, closed: Boolean)
-    fun onExit()
+    fun onExit(exitCode: Int)
+
+    fun await(): Result<R>
 }

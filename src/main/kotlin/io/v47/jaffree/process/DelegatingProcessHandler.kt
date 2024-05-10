@@ -23,7 +23,7 @@ internal class DelegatingProcessHandler(
     private val delegate: JaffreeProcessHandler<*>,
 ) : DefaultProcessHandler() {
     override fun onExit(exitCode: Int) {
-        delegate.onExit()
+        delegate.onExit(exitCode)
     }
 
     override fun onStdout(buffer: ByteBuffer, closed: Boolean) {

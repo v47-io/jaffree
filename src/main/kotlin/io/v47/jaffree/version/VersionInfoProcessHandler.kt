@@ -43,8 +43,8 @@ internal class VersionInfoProcessHandler : LinesProcessHandler<VersionInfo>() {
         }
     }
 
-    override fun onExit() {
-        result = createVersionInfo()
+    override fun onExit(exitCode: Int) {
+        finish(createVersionInfo())
     }
 
     private fun createVersionInfo(): VersionInfo {

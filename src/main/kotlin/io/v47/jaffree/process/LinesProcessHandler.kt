@@ -20,24 +20,13 @@ import com.github.kokorin.jaffree.LogLevel
 import com.github.kokorin.jaffree.log.LogMessage
 import org.slf4j.Logger
 import java.nio.ByteBuffer
-import kotlin.concurrent.Volatile
+import java.util.concurrent.CompletableFuture
 
 private const val CARRIAGE_RETURN = '\r'.code.toByte()
 private const val NEWLINE = '\n'.code.toByte()
 
 internal abstract class LinesProcessHandler<R> : JaffreeProcessHandler<R> {
-    @Volatile
-    override var result: R? = null
-        protected set
-
-    @Volatile
-    override var exception: Exception? = null
-        protected set(value) {
-            if (field == null)
-                field = value
-            else
-                value?.let { field!!.addSuppressed(it) }
-        }
+    private val result = CompletableFuture<R>()
 
     override val errorLogMessages = mutableListOf<LogMessage>()
 
@@ -94,6 +83,7 @@ internal abstract class LinesProcessHandler<R> : JaffreeProcessHandler<R> {
             val message = "$lastLogMessageBuilder"
 
             when (logLevel) {
+                LogLevel.QUIET,
                 LogLevel.TRACE -> logger.trace(message)
 
                 LogLevel.VERBOSE,
@@ -102,7 +92,6 @@ internal abstract class LinesProcessHandler<R> : JaffreeProcessHandler<R> {
                 LogLevel.INFO -> logger.info(message)
                 LogLevel.WARNING -> logger.warn(message)
 
-                LogLevel.QUIET,
                 LogLevel.PANIC,
                 LogLevel.FATAL,
                 LogLevel.ERROR -> {
@@ -111,11 +100,27 @@ internal abstract class LinesProcessHandler<R> : JaffreeProcessHandler<R> {
                 }
             }
 
-            if (logLevel.isErrorOrHigher)
-                finalErrorMessage = message
+            finalErrorMessage =
+                if (logLevel.isErrorOrHigher)
+                    message
+                else
+                    null
 
             additionalAction?.invoke(logLevel, message)
         }
+    }
+
+    override fun await(): Result<R> =
+        runCatching {
+            result.get()
+        }
+
+    protected fun finish(value: R) {
+        result.complete(value)
+    }
+
+    protected fun finishExceptionally(ex: Exception) {
+        result.completeExceptionally(ex)
     }
 }
 
