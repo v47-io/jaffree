@@ -42,6 +42,13 @@ jobs:
 
       - name: Setup FFmpeg (${{ runner.os }})
         uses: FedericoCarboni/setup-ffmpeg@v2
+        if: ${{ runner.os != 'macOS' }}
+
+      - name: Setup FFmpeg (${{ runner.os }})
+        run: |
+          brew update
+          brew install ffmpeg
+        if: ${{ runner.os == 'macOS' }}
 
       - name: Build (${{ runner.os }})
         uses: burrunan/gradle-cache-action@v1
