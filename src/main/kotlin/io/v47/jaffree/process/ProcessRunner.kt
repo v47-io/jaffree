@@ -103,9 +103,6 @@ internal class ProcessRunner<T>(
                     }
 
                     helperFutures.forEach {
-                        if (!it.isDone)
-                            it.cancel(true)
-
                         it.get()
                     }
                 }

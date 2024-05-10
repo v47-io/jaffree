@@ -54,9 +54,9 @@ internal class VersionInfoProcessHandler : LinesProcessHandler<VersionInfo>() {
 
         return VersionInfo(
             vm.value,
-            vm.groupValues[1].toInt(),
-            vm.groupValues.getOrNull(2)?.toInt() ?: 0,
-            vm.groupValues.getOrNull(3)?.toInt() ?: 0,
+            vm.groupValues[1].ifBlank { "0" }.toInt(),
+            vm.groupValues[2].ifBlank { "0" }.toInt(),
+            vm.groupValues[3].ifBlank { "0" }.toInt(),
             enabledFeatures,
             disabledFeatures
         )
