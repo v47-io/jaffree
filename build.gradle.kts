@@ -47,15 +47,8 @@ dependencies {
     testRuntimeOnly(libs.junitEngine)
 }
 
-java.sourceCompatibility = VERSION_11
-java.targetCompatibility = VERSION_11
-
 kotlin {
     jvmToolchain(11)
-}
-
-tasks.compileKotlin {
-    destinationDirectory.set(tasks.compileJava.get().destinationDirectory)
 }
 
 tasks.test {
