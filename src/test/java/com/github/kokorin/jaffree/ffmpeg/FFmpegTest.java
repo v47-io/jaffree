@@ -11,6 +11,7 @@ import com.github.kokorin.jaffree.ffprobe.Stream;
 import com.github.kokorin.jaffree.process.JaffreeAbnormalExitException;
 import com.github.kokorin.jaffree.process.ProcessHelper;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -322,21 +323,39 @@ public class FFmpegTest {
     }
 
     @Test
-    @Disabled("this always fails with exit-code 187 even though the correct output is produced")
     public void testSizeLimit() throws Exception {
         Path tempDir = Files.createTempDirectory("jaffree");
         Path outputPath = tempDir.resolve(Artifacts.VIDEO_MP4.getFileName());
 
-        FFmpegResult result = FFmpeg.atPath(Config.FFMPEG_BIN)
-                .addInput(UrlInput.fromPath(Artifacts.VIDEO_MP4))
-                .addOutput(UrlOutput
-                        .toPath(outputPath)
-                        .copyAllCodecs()
-                        .setSizeLimit(1_000_000L)
-                )
-                .execute();
+        final AtomicBoolean muxingErrorDetected = new AtomicBoolean(false);
+        OutputListener outputListener = (message, processAccess) -> {
+            if (message.endsWith("Error muxing a packet")) {
+                LOGGER.warn("Detected a muxing error, which indicates ffmpeg bug #10327");
+                muxingErrorDetected.set(true);
+            }
+        };
 
-        Assertions.assertNotNull(result);
+        try {
+            FFmpegResult result = FFmpeg.atPath(Config.FFMPEG_BIN)
+                    .addInput(UrlInput.fromPath(Artifacts.VIDEO_MP4))
+                    .setOutputListener(outputListener)
+                    .addOutput(UrlOutput
+                            .toPath(outputPath)
+                            .copyAllCodecs()
+                            .setSizeLimit(1_000_000L)
+                    )
+                    .execute();
+            Assertions.assertNotNull(result);
+        } catch (JaffreeAbnormalExitException ex) {
+            // Detect ffmpeg bug "Error muxing a packet when limit file size parameter is set"
+            // https://trac.ffmpeg.org/ticket/10327
+            Assumptions.assumeFalse(
+                    muxingErrorDetected.get(),
+                    "Hit ffmpeg bug #10327 - we will ignore this test"
+            );
+
+            Assertions.fail("Abnormal exit for limit file size");
+        }
 
         long outputSize = Files.size(outputPath);
         assertTrue(outputSize > 900_000);
