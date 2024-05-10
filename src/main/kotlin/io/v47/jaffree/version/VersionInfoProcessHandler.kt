@@ -26,7 +26,7 @@ internal class VersionInfoProcessHandler : LinesProcessHandler<VersionInfo>() {
     private val enabledFeatures = mutableSetOf<String>()
     private val disabledFeatures = mutableSetOf<String>()
 
-    override fun onStderrLine(line: String) = Unit
+    override fun onStderrLine(line: String) = onStdoutLine(line)
 
     override fun onStdoutLine(line: String) {
         if (versionMatch == null && "version" in line)

@@ -403,7 +403,9 @@ public class FFmpeg {
     }
 
     /**
-     * Provides information about the actual FFmpeg version
+     * Provides information about the actual FFmpeg version.
+     *
+     * @return An object containing version information.
      */
     public VersionInfo version() {
         return new ProcessRunner<>(executable,
