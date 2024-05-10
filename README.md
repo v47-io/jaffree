@@ -30,28 +30,6 @@ implementation("io.v47.jaffree:jaffree:$jaffreeVersion")
 </dependency>
 ```
 
-## History
-
-Inspired by [ffmpeg-cli-wrapper][ffmpeg-cli-wrapper].
-
-This is a fork of [Jaffree][jaffree] by Denis Kokorin with a progressive
-outlook that tries to maintain 99% API compatibility with the original.
-
-[ffmpeg-cli-wrapper]: https://github.com/bramp/ffmpeg-cli-wrapper
-
-[jaffree]: https://github.com/kokorin/Jaffree
-
-## Differences to Kokorin's library
-
-- Revamped process execution using different method of launching processes
-- No more puller threads for process stdout and stderr (handled by NuProcess)
-- Proper async API using CompletionStage
-- Async FFprobe execution, not just FFmpeg
-- Using the latest versions of all dependencies and plugins
-- Gradle instead of Maven
-- New code is written in Kotlin instead of Java for more robustness and better maintainability
-- JDK support starts at 11 (dropped support for Java 1.8)
-
 ## Compatibility
 
 Jaffree has been tested and verified to work with FFmpeg 4 until 6. It should also work with other
@@ -63,6 +41,28 @@ Tested to work on Windows, macOS (Intel & Apple Silicon), and Linux.
 
 - JDK 11
 - FFmpeg 4+
+
+## History
+
+Inspired by [ffmpeg-cli-wrapper][ffmpeg-cli-wrapper].
+
+This is a fork of [Jaffree][jaffree] by Denis Kokorin with a progressive
+outlook that tries to maintain 99% API compatibility with the original.
+
+[ffmpeg-cli-wrapper]: https://github.com/bramp/ffmpeg-cli-wrapper
+
+[jaffree]: https://github.com/kokorin/Jaffree
+
+### Differences to Kokorin's library
+
+- Revamped process execution using different method of launching processes
+- No more puller threads for process stdout and stderr (handled by NuProcess)
+- Proper async API using CompletionStage
+- Async FFprobe execution, not just FFmpeg
+- Using the latest versions of all dependencies and plugins
+- Gradle instead of Maven
+- New code is written in Kotlin instead of Java for more robustness and better maintainability
+- JDK support starts at 11 (dropped support for Java 1.8)
 
 ## License
 
