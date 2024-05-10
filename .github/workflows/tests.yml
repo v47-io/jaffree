@@ -47,7 +47,7 @@ jobs:
       - name: Setup FFmpeg (${{ runner.os }})
         run: |
           brew update
-          brew install ffmpeg
+          brew install ffmpeg@6
           ffmpeg -version
         if: ${{ runner.os == 'macOS' }}
 

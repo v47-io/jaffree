@@ -26,6 +26,11 @@ outlook that tries to maintain 99% API compatibility with the original.
 - Gradle instead of Maven
 - JDK support starts at 11 (dropped support for Java 1.8)
 
+## Compatibility
+
+Jaffree has been tested and verified to work with FFmpeg 4 until 6. It should also work with other
+versions but your mileage may vary.
+
 ## Dependencies
 
 - JDK 11
