@@ -48,6 +48,7 @@ jobs:
         run: |
           brew update
           brew install ffmpeg@6
+          brew link ffmpeg@6 --force
           ffmpeg -version
         if: ${{ runner.os == 'macOS' }}
 
