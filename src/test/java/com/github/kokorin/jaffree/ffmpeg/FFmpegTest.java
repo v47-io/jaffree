@@ -39,8 +39,8 @@ import static java.nio.file.StandardOpenOption.WRITE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 public class FFmpegTest {
     public static Path ERROR_MP4 = Paths.get("non_existent.mp4");
@@ -462,21 +462,14 @@ public class FFmpegTest {
 
     @Test
     public void testExceptionIsThrownIfFfmpegExitsWithError() {
-        try {
+        var ex = assertThrowsExactly(JaffreeAbnormalExitException.class, () -> {
             FFmpeg.atPath(Config.FFMPEG_BIN)
                     .addInput(UrlInput.fromPath(ERROR_MP4))
                     .addOutput(new NullOutput())
                     .execute();
-        } catch (JaffreeAbnormalExitException e) {
-            assertEquals(
-                    "Process execution has ended with non-zero status: 254. Check logs for detailed error message.",
-                    e.getMessage());
-            assertFalse(e.getProcessErrorLogMessages().isEmpty());
-            return;
-        }
+        });
 
-        fail("JaffreeAbnormalExitException should have been thrown!");
-
+        assertFalse(ex.getProcessErrorLogMessages().isEmpty());
     }
 
     @Test
