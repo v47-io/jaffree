@@ -35,4 +35,5 @@ module com.github.kokorin.jaffree {
     exports com.github.kokorin.jaffree.util;
 
     exports io.v47.jaffree.process;
+    exports io.v47.jaffree.version;
 }

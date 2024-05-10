@@ -40,6 +40,8 @@ import com.github.kokorin.jaffree.process.ProcessHelper;
 import io.v47.jaffree.ffmpeg.FFmpegProcessHandler;
 import io.v47.jaffree.process.ProcessFuture;
 import io.v47.jaffree.process.ProcessRunner;
+import io.v47.jaffree.version.VersionInfo;
+import io.v47.jaffree.version.VersionInfoProcessHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,6 +49,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -397,6 +400,18 @@ public class FFmpeg {
     public FFmpeg setContextName(final String contextName) {
         this.contextName = contextName;
         return this;
+    }
+
+    /**
+     * Provides information about the actual FFmpeg version
+     */
+    public VersionInfo version() {
+        return new ProcessRunner<>(executable,
+                List.of("-version"),
+                Collections.emptyList(),
+                new VersionInfoProcessHandler())
+                .executeAsync()
+                .get();
     }
 
     /**

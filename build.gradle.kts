@@ -93,7 +93,7 @@ checkstyle {
 tasks.checkstyleTest.get().enabled = false
 
 jacoco {
-    toolVersion = "0.8.10"
+    toolVersion = "0.8.12"
 }
 
 /*pmd {

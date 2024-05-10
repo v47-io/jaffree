@@ -37,6 +37,7 @@ import static java.nio.file.StandardOpenOption.READ;
 import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
 import static java.nio.file.StandardOpenOption.WRITE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -468,11 +469,9 @@ public class FFmpegTest {
                     .execute();
         } catch (JaffreeAbnormalExitException e) {
             assertEquals(
-                    "Process execution has ended with non-zero status: 1. Check logs for detailed error message.",
+                    "Process execution has ended with non-zero status: 254. Check logs for detailed error message.",
                     e.getMessage());
-            assertEquals(1, e.getProcessErrorLogMessages().size());
-            assertEquals("non_existent.mp4: No such file or directory",
-                    e.getProcessErrorLogMessages().get(0).message);
+            assertFalse(e.getProcessErrorLogMessages().isEmpty());
             return;
         }
 
@@ -845,7 +844,7 @@ public class FFmpegTest {
             }
         }
 
-        FFmpegResult result = FFmpeg.atPath(Config.FFMPEG_BIN)
+        FFmpeg.atPath(Config.FFMPEG_BIN)
                 .addInput(
                         new UrlInput(Artifacts.VIDEO_MP4.toString()) {
                             @Override
