@@ -21,7 +21,7 @@ private val hexChars = "abcdef0123456789".toCharArray()
 
 internal fun generateRandomId(length: Int = 8) =
     buildString {
-        (0..<length).forEach { _ ->
+        repeat(length) {
             append(hexChars.random())
         }
     }

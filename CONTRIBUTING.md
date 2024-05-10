@@ -16,12 +16,12 @@ Make sure you include tests for your changes where appropriate.
 If you need some media files to test your code you are encouraged use the files provided by the 
 generated `com.github.kokorin.jaffree.Artifacts` class.
 
-## Licensing
+## Licensing of contributed material
 
 Before creating a Pull Request make sure you have all the rights to the contributed material or have
 permission from the original creators to publish it in this manner.
 
-Furthermore, you must also agree to provide the contributed material under the terms of the 
-[GNU General Public License Version 3][license].
+Furthermore, by creating a Pull Request you agree to provide the contributed material under the 
+terms of the [GNU General Public License Version 3][license].
 
 [license]: ./LICENSE
