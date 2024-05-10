@@ -75,7 +75,7 @@ license {
     )
 
     header = file("HEADER.txt")
-    skipExistingHeaders = false
+    skipExistingHeaders = true
 
     ext {
         set("year", Calendar.getInstance().get(Calendar.YEAR))
