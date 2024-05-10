@@ -109,19 +109,6 @@ internal abstract class LinesProcessHandler<R> : JaffreeProcessHandler<R> {
             additionalAction?.invoke(logLevel, message)
         }
     }
-
-    override fun await(): Result<R> =
-        runCatching {
-            result.get()
-        }
-
-    protected fun finish(value: R) {
-        result.complete(value)
-    }
-
-    protected fun finishExceptionally(ex: Exception) {
-        result.completeExceptionally(ex)
-    }
 }
 
 private fun addToBytes(source: ByteBuffer, target: MutableList<ByteArray>): Boolean {

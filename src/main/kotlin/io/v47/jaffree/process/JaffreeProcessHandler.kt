@@ -25,7 +25,6 @@ internal interface JaffreeProcessHandler<R> {
 
     fun onStderr(buffer: ByteBuffer, closed: Boolean)
     fun onStdout(buffer: ByteBuffer, closed: Boolean)
-    fun onExit(exitCode: Int)
 
-    fun await(): Result<R>
+    fun getResult(exitCode: Int): Result<R>
 }

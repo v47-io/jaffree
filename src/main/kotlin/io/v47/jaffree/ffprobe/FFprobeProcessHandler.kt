@@ -56,26 +56,24 @@ internal class FFprobeProcessHandler(
         contentWritten = true
     }
 
-    override fun onExit(exitCode: Int) {
+    override fun getResult(exitCode: Int): Result<FFprobeResult> {
         stdOutputWriter.close()
         stdOutputContent.close()
 
         processLastLogMessage(ffprobeLogger)
 
-        if (exitCode != 0 && finalErrorMessage != null) {
-            finishExceptionally(JaffreeException(finalErrorMessage))
-            return
-        }
+        if (exitCode != 0 && finalErrorMessage != null)
+            return Result.failure(JaffreeException(finalErrorMessage))
 
-        ByteArrayInputStream(stdOutputContent.toByteArray()).use { input ->
+        ffprobeLogger.debug("Reading probe data using {} parser", parser.formatName)
+
+        return ByteArrayInputStream(stdOutputContent.toByteArray()).use { input ->
             runCatching {
-                ffprobeLogger.debug("Reading probe data using {} parser", parser.formatName)
-
                 parser.parse(input)
-            }.onFailure { x ->
-                finishExceptionally(JaffreeException("Failed to parse probe data", x))
-            }.onSuccess { probeData ->
-                finish(FFprobeResult(probeData))
+            }.recoverCatching { x ->
+                throw JaffreeException("Failed to parse probe data", x)
+            }.map { probeData ->
+                FFprobeResult(probeData)
             }
         }
     }

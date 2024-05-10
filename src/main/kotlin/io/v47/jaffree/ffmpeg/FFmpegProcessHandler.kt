@@ -65,13 +65,13 @@ internal class FFmpegProcessHandler(
             appendOrLogLine(ffmpegLogger, line.trim())
     }
 
-    override fun onExit(exitCode: Int) {
+    override fun getResult(exitCode: Int): Result<FFmpegResult> {
         processLastLogMessage(ffmpegLogger, ::handleLogMessage)
 
-        if (exitCode != 0 && finalErrorMessage != null)
-            finishExceptionally(JaffreeException(finalErrorMessage))
+        return if (exitCode != 0 && finalErrorMessage != null)
+            Result.failure(JaffreeException(finalErrorMessage))
         else
-            finish(possibleResult ?: FFmpegResult(null, null, null, null, null, null))
+            Result.success(possibleResult ?: FFmpegResult(null, null, null, null, null, null))
     }
 
     private fun handleLogMessage(logLevel: LogLevel, message: String) {

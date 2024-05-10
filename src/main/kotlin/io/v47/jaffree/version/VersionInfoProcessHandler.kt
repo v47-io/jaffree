@@ -43,9 +43,10 @@ internal class VersionInfoProcessHandler : LinesProcessHandler<VersionInfo>() {
         }
     }
 
-    override fun onExit(exitCode: Int) {
-        finish(createVersionInfo())
-    }
+    override fun getResult(exitCode: Int) =
+        runCatching {
+            createVersionInfo()
+        }
 
     private fun createVersionInfo(): VersionInfo {
         val vm = versionMatch

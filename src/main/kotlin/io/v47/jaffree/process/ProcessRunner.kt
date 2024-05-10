@@ -80,31 +80,41 @@ internal class ProcessRunner<T>(
                 val nuProcessBuilder = NuProcessBuilder(actualProcessHandler, command)
                 nuProcessBuilder.environment()["AV_LOG_FORCE_NOCOLOR"] = "1"
 
-                val process = nuProcessBuilder.start()
-                    ?: throw JaffreeAbnormalExitException("Process failed to start", emptyList())
+                val exitCode: Int
+                val result: Result<T>
 
-                processAccess.process = process
+                try {
+                    val process = nuProcessBuilder.start()
+                        ?: throw JaffreeAbnormalExitException(
+                            "Process failed to start",
+                            emptyList()
+                        )
 
-                logger.debug("[{}] Waiting for process to finish", execTag)
-                val status = process.waitFor(0, TimeUnit.SECONDS)
+                    processAccess.process = process
 
-                logger.info("[{}] Process finished with status: {}", execTag, status)
+                    logger.debug("[{}] Waiting for process to finish", execTag)
+                    exitCode = process.waitFor(0, TimeUnit.SECONDS)
+                    result = processHandler.getResult(exitCode)
+                } finally {
+                    processAccess.process = null
 
-                processAccess.process = null
+                    helpers.forEach {
+                        (it as? ProcessHelper)?.close()
+                    }
 
-                helpers.forEach {
-                    (it as? ProcessHelper)?.close()
+                    helperFutures.forEach {
+                        if (!it.isDone)
+                            it.cancel(true)
+
+                        it.get()
+                    }
                 }
 
-                helperFutures.forEach {
-                    it.get()
-                }
+                logger.info("[{}] Process finished with status: {}", execTag, exitCode)
 
-                val result = processHandler.await()
-
-                if (status != 0)
+                if (exitCode != 0)
                     throw JaffreeAbnormalExitException(
-                        errorExceptionMessage(status),
+                        errorExceptionMessage(exitCode),
                         processHandler.errorLogMessages
                     ).also {
                         if (result.isFailure)
