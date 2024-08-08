@@ -24,7 +24,6 @@ import org.slf4j.LoggerFactory
 import java.nio.file.Path
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.CompletionException
-import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
 private val logger = LoggerFactory.getLogger(ProcessRunner::class.java)!!
@@ -65,7 +64,7 @@ internal class ProcessRunner<T>(
 
         val threadPool =
             if (helpers.isNotEmpty())
-                Executors.newFixedThreadPool(helpers.size)
+                ProcessConfig.executorFactory(helpers.size)
             else
                 null
 

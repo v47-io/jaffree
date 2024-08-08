@@ -1,5 +1,4 @@
 import name.remal.gradle_plugins.plugins.publish.ossrh.RepositoryHandlerOssrhExtension
-import org.gradle.api.JavaVersion.VERSION_11
 import org.jetbrains.dokka.DokkaConfiguration
 import org.jetbrains.dokka.Platform
 import org.jetbrains.dokka.gradle.DokkaTask
@@ -49,6 +48,12 @@ dependencies {
 
 kotlin {
     jvmToolchain(11)
+}
+
+tasks.compileJava {
+    options.compilerArgumentProviders.add(CommandLineArgumentProvider {
+        listOf("--patch-module", "com.github.kokorin.jaffree=${sourceSets["main"].output.asPath}")
+    })
 }
 
 tasks.test {

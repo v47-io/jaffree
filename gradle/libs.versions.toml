@@ -2,15 +2,15 @@
 annotations = "24.1.0"
 commons-io = "2.16.1"
 dokka = "1.9.20"
-junitJupiter = "5.10.2"
-kotlin = "1.9.24"
+junitJupiter = "5.10.3"
+kotlin = "2.0.10"
 license = "0.16.1"
 logback = "1.5.6"
 nanojson = "1.9"
 nuprocess = "2.0.6"
 release = "3.0.2"
 remal-gradle-plugins = "1.9.2"
-slf4j = "2.0.13"
+slf4j = "2.0.14"
 
 [libraries]
 annotations = { module = "org.jetbrains:annotations", version.ref = "annotations" }
