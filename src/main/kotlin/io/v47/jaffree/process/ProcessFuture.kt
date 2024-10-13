@@ -18,12 +18,14 @@ package io.v47.jaffree.process
 
 import com.github.kokorin.jaffree.JaffreeException
 import com.github.kokorin.jaffree.process.JaffreeAbnormalExitException
+import java.util.concurrent.CancellationException
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.CompletionStage
 import java.util.concurrent.ExecutionException
 import java.util.concurrent.Executor
 import java.util.concurrent.Future
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicBoolean
 import java.util.function.BiConsumer
 import java.util.function.BiFunction
 import java.util.function.Consumer
@@ -74,18 +76,33 @@ private class ProcessFutureImpl<T>(
     private val delegate: CompletableFuture<T>,
     override val processAccess: ProcessAccess
 ) : ProcessFuture<T> {
-    override fun cancel(mayInterruptIfRunning: Boolean): Boolean {
-        if (mayInterruptIfRunning)
-            processAccess.stopForcefully()
-        else
-            processAccess.stopGracefully()
+    private val isCancelledMut = AtomicBoolean()
+    private val isDoneMut = AtomicBoolean()
 
-        return delegate.cancel(mayInterruptIfRunning)
+    override fun cancel(mayInterruptIfRunning: Boolean): Boolean {
+        // IMPORTANT: never call delegate.cancel in here, this will break
+        // everything as there is cleanup code that needs to run after a
+        // process finished.
+        // Also, it always throws CancellationException, what's up with that!?
+
+        if (isDone)
+            return false
+
+        if (!isCancelledMut.getAndSet(true)) {
+            isDoneMut.set(true)
+
+            if (mayInterruptIfRunning)
+                processAccess.stopForcefully()
+            else
+                processAccess.stopGracefully()
+        }
+
+        return isCancelled
     }
 
-    override fun isCancelled() = delegate.isCancelled
+    override fun isCancelled() = isCancelledMut.get()
 
-    override fun isDone() = delegate.isDone
+    override fun isDone() = isDoneMut.get() || delegate.isDone
 
     override fun get(): T =
         get(Long.MAX_VALUE, TimeUnit.MILLISECONDS)

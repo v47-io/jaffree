@@ -10,6 +10,7 @@ import com.github.kokorin.jaffree.ffprobe.FFprobeResult;
 import com.github.kokorin.jaffree.ffprobe.Stream;
 import com.github.kokorin.jaffree.process.JaffreeAbnormalExitException;
 import com.github.kokorin.jaffree.process.ProcessHelper;
+import io.v47.jaffree.process.ProcessFuture;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Disabled;
@@ -886,5 +887,24 @@ public class FFmpegTest {
                 .execute();
 
         assertEquals(2, probeResult.getStreams().size());
+    }
+
+    @Test
+    public void testCancellationOfProcessFuture() throws Exception {
+        Path tempDir = Files.createTempDirectory("jaffree");
+        Path outputPath = tempDir.resolve(Artifacts.VIDEO_MP4.getFileName());
+
+        ProcessFuture<FFmpegResult> result = FFmpeg.atPath(Config.FFMPEG_BIN)
+                .addInput(UrlInput.fromPath(Artifacts.VIDEO_FLV))
+                .addOutput(UrlOutput.toPath(outputPath))
+                .executeAsync();
+
+        // waiting for the process to start
+        Thread.sleep(500);
+
+        result.cancel(false);
+        result.get();
+
+        assertTrue(result.isCancelled());
     }
 }
