@@ -26,8 +26,6 @@ jobs:
 
       - name: Setup FFmpeg (${{ runner.os }})
         uses: FedericoCarboni/setup-ffmpeg@v3
-        with:
-          ffmpeg-version: 7.1.1
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4

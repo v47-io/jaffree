@@ -43,8 +43,6 @@ jobs:
       - name: Setup FFmpeg (${{ runner.os }})
         uses: FedericoCarboni/setup-ffmpeg@v3
         if: ${{ runner.os != 'macOS' }}
-        with:
-          ffmpeg-version: 7.1.1
 
       - name: Setup FFmpeg (${{ runner.os }})
         run: |
