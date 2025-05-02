@@ -32,7 +32,7 @@ implementation("io.v47.jaffree:jaffree:$jaffreeVersion")
 
 ## Compatibility
 
-Jaffree has been tested and verified to work with FFmpeg 4 until 6. It should also work with other
+Jaffree has been tested and verified to work with FFmpeg 4 until 7. It should also work with other
 versions but your mileage may vary.
 
 Tested to work on Windows, macOS (Intel & Apple Silicon), and Linux.

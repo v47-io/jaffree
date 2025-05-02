@@ -10,39 +10,39 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Setup JDK 11
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: 11
 
       - name: Cache Test Artifacts
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: .artifacts
           key: ${{ runner.os }}-artifacts-${{ hashFiles('**/Artifacts.java') }}
 
       - name: Setup FFmpeg (${{ runner.os }})
-        uses: FedericoCarboni/setup-ffmpeg@v2
-
-      - name: Build and test using gradle (${{ runner.os }})
-        uses: burrunan/gradle-cache-action@v1
+        uses: FedericoCarboni/setup-ffmpeg@v3
         with:
-          arguments: --console=plain build
+          ffmpeg-version: 7.1.1
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Build and test
+        run: ./gradlew build
 
       - name: Publish to Central Repository (${{ runner.os }})
-        uses: burrunan/gradle-cache-action@v1
-        with:
-          arguments: --console=plain publish releaseNexusRepositories
-          execution-only-caches: true
+        run: ./gradlew publishAndReleaseToMavenCentral --no-configuration-cache
         env:
-          OSSRH_USER: ${{ secrets.OSSRH_USER }}
-          OSSRH_PASS: ${{ secrets.OSSRH_PASS }}
-          SIGNING_PASSWORD: ${{ secrets.OSSRH_SIGNING_PASSWORD }}
-          SIGNING_KEY_ID: ${{ secrets.OSSRH_SIGNING_KEY_ID }}
-          SIGNING_SECRET_KEY_RING_BASE64: ${{ secrets.OSSRH_SIGNING_SECRET_KEY_RING_BASE64 }}
+          ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.NCMP_USERNAME }}
+          ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.NCMP_PASSWORD }}
+          ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.NCMP_SECRET_KEY_ARMOR }}
+          ORG_GRADLE_PROJECT_signingInMemoryKeyId: ${{ secrets.NCMP_SECRET_KEY_ID }}
+          ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.NCMP_SECRET_KEY_PASSWORD }}
 
       - name: Archive logs on failure
         if: ${{ failure() }}
