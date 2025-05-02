@@ -474,6 +474,12 @@ public class FFmpegTest {
                 assertEquals(3, e.getProcessErrorLogMessages().size());
                 assertEquals("Error opening input file non_existent.mp4.",
                         e.getProcessErrorLogMessages().get(1).message);
+            } else if ("Process execution has ended with non-zero status: -2. Check logs for detailed error message.".equals(
+                    e.getMessage())) {
+                // FFmpeg 7
+                assertEquals(3, e.getProcessErrorLogMessages().size());
+                assertEquals("Error opening input file non_existent.mp4.",
+                        e.getProcessErrorLogMessages().get(1).message);
             } else if ("Process execution has ended with non-zero status: 1. Check logs for detailed error message.".equals(
                     e.getMessage())) {
                 assertEquals(1, e.getProcessErrorLogMessages().size());
