@@ -24,8 +24,8 @@ jobs:
           path: .artifacts
           key: ${{ runner.os }}-artifacts-${{ hashFiles('**/Artifacts.java') }}
 
-      - name: Setup FFmpeg (${{ runner.os }})
-        uses: FedericoCarboni/setup-ffmpeg@v3
+      - name: Install ffmpeg on Ubuntu
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
