@@ -51,25 +51,41 @@ public class ParseUtilTest {
         ));
 
         for (LogLevel logLevel : LogLevel.values()) {
-            Assertions.assertEquals(logLevel, ParseUtil.parseLogLevel("[" + logLevel.name().toLowerCase() + "]"));
+            Assertions.assertEquals(logLevel,
+                    ParseUtil.parseLogLevel("[" + logLevel.name().toLowerCase() + "]"));
         }
 
         for (LogLevel logLevel : LogLevel.values()) {
             Assertions.assertNull(ParseUtil.parseLogLevel("[" + logLevel.name().toLowerCase()));
         }
 
-        Assertions.assertNull(ParseUtil.parseLogLevel("[mov,mp4,m4a,3gp,3g2,mj2 @ 0x56288d084700]"));
-        Assertions.assertNull(ParseUtil.parseLogLevel("[mov,mp4,m4a,3gp,3g2,mj2 @ 0x56288d084700] [inf"));
+        Assertions.assertNull(
+                ParseUtil.parseLogLevel("[mov,mp4,m4a,3gp,3g2,mj2 @ 0x56288d084700]"));
+        Assertions.assertNull(
+                ParseUtil.parseLogLevel("[mov,mp4,m4a,3gp,3g2,mj2 @ 0x56288d084700] [inf"));
     }
 
     @Test
-    public void parsResult() throws Exception {
-        String value = "video:1417kB audio:113kB subtitle:0kB other streams:0kB global headers:0kB muxing overhead: unknown";
+    public void parseKibiByteFormats() {
+        final Long oldFormat = ParseUtil.parseSizeInKibiBytes("2904kB");
+        Assertions.assertEquals(2904L, oldFormat.longValue());
+
+        final Long newFormat = ParseUtil.parseSizeInKibiBytes("2904KiB");
+        Assertions.assertEquals(2904L, newFormat.longValue());
+
+        final Long unknownFormat = ParseUtil.parseSizeInKibiBytes("2904KB");
+        Assertions.assertNull(unknownFormat);
+    }
+
+    @Test
+    public void parseResult() throws Exception {
+        String value =
+                "video:1417kB audio:113kB subtitle:0kB other streams:0kB global headers:0kB muxing overhead: unknown";
         FFmpegResult result = ParseUtil.parseResult(value);
 
         Assertions.assertNotNull(result);
-        Assertions.assertEquals((Long) 1_417_000L, result.getVideoSize());
-        Assertions.assertEquals((Long) 113_000L, result.getAudioSize());
+        Assertions.assertEquals((Long) 1_451_008L, result.getVideoSize());
+        Assertions.assertEquals((Long) 115_712L, result.getAudioSize());
         Assertions.assertEquals((Long) 0L, result.getSubtitleSize());
         Assertions.assertEquals((Long) 0L, result.getOtherStreamsSize());
         Assertions.assertEquals((Long) 0L, result.getGlobalHeadersSize());
@@ -78,7 +94,8 @@ public class ParseUtilTest {
 
     @Test
     public void parseZeroResult() throws Exception {
-        String value = "video:0kB audio:0kB subtitle:0kB other streams:0kB global headers:0kB muxing overhead: 0.000000%";
+        String value =
+                "video:0kB audio:0kB subtitle:0kB other streams:0kB global headers:0kB muxing overhead: 0.000000%";
         FFmpegResult result = ParseUtil.parseResult(value);
 
         Assertions.assertNotNull(result);

@@ -38,10 +38,9 @@ import static java.nio.file.StandardOpenOption.READ;
 import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
 import static java.nio.file.StandardOpenOption.WRITE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class FFmpegTest {
     public static Path ERROR_MP4 = Paths.get("non_existent.mp4");
@@ -463,14 +462,30 @@ public class FFmpegTest {
 
     @Test
     public void testExceptionIsThrownIfFfmpegExitsWithError() {
-        var ex = assertThrowsExactly(JaffreeAbnormalExitException.class, () -> {
+        try {
             FFmpeg.atPath(Config.FFMPEG_BIN)
                     .addInput(UrlInput.fromPath(ERROR_MP4))
                     .addOutput(new NullOutput())
                     .execute();
-        });
+        } catch (JaffreeAbnormalExitException e) {
+            if ("Process execution has ended with non-zero status: 254. Check logs for detailed error message.".equals(
+                    e.getMessage())) {
+                // FFmpeg 6+
+                assertEquals(3, e.getProcessErrorLogMessages().size());
+                assertEquals("Error opening input file non_existent.mp4.",
+                        e.getProcessErrorLogMessages().get(1).message);
+            } else if ("Process execution has ended with non-zero status: 1. Check logs for detailed error message.".equals(
+                    e.getMessage())) {
+                assertEquals(1, e.getProcessErrorLogMessages().size());
+                assertEquals("non_existent.mp4: No such file or directory",
+                        e.getProcessErrorLogMessages().get(0).message);
+            } else {
+                fail("Unknown FFmpeg output format (update test code!)");
+            }
+            return;
+        }
 
-        assertFalse(ex.getProcessErrorLogMessages().isEmpty());
+        fail("JaffreeAbnormalExitException should have been thrown!");
     }
 
     @Test
