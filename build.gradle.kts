@@ -154,6 +154,13 @@ mavenPublishing {
                 email.set("kokorin86@gmail.com")
                 url.set("https://github.com/kokorin")
             }
+
+            developer {
+                id.set("jonfryd")
+                name.set("Jon Frydensbjerg")
+                email.set("jonf@vip.cybercity.dk")
+                url.set("https://github.com/jonfryd")
+            }
         }
 
         scm {
