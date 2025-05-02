@@ -4,16 +4,10 @@ on:
   push:
     branches:
       - main
-  pull_request:
-    types:
-      - opened
-      - reopened
-      - synchronize
-    branches:
-      - main
 
 permissions:
   checks: write
+  contents: write
 
 jobs:
   tests:
