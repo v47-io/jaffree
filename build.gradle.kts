@@ -1,4 +1,3 @@
-import com.vanniktech.maven.publish.SonatypeHost
 import org.jetbrains.dokka.gradle.engine.parameters.VisibilityModifier
 import java.net.URI
 import java.util.*
@@ -70,7 +69,7 @@ license {
     skipExistingHeaders = true
 
     ext {
-        set("year", Calendar.getInstance().get(Calendar.YEAR))
+        set("year", Calendar.getInstance().get(YEAR))
     }
 }
 
@@ -85,7 +84,7 @@ checkstyle {
 tasks.checkstyleTest.get().enabled = false
 
 jacoco {
-    toolVersion = "0.8.12"
+    toolVersion = "0.8.13"
 }
 
 dokka {
@@ -123,7 +122,7 @@ dokka {
 }
 
 mavenPublishing {
-    publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
+    publishToMavenCentral()
     signAllPublications()
 
     coordinates("${project.group}", project.name, "${project.version}")

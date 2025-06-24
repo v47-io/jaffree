@@ -39,6 +39,7 @@ import com.github.kokorin.jaffree.net.NegotiatingTcpServer;
 import com.github.kokorin.jaffree.process.ProcessHelper;
 import io.v47.jaffree.ffmpeg.FFmpegProcessHandler;
 import io.v47.jaffree.process.ProcessFuture;
+import io.v47.jaffree.process.ProcessListener;
 import io.v47.jaffree.process.ProcessRunner;
 import io.v47.jaffree.version.VersionInfo;
 import io.v47.jaffree.version.VersionInfoProcessHandler;
@@ -63,6 +64,7 @@ public class FFmpeg {
     private final List<Output> outputs = new ArrayList<>();
     private final List<String> additionalArguments = new ArrayList<>();
     private boolean overwriteOutput;
+    private ProcessListener processListener;
     private ProgressListener progressListener;
     private OutputListener outputListener;
     private String progress;
@@ -403,6 +405,18 @@ public class FFmpeg {
     }
 
     /**
+     * Sets a process listener that can be used to access the ProcessAccess instance
+     * before it can be retrieved from a ProcessFuture.
+     *
+     * @param processListener process listener
+     * @return this
+     */
+    public FFmpeg setProcessListener(final ProcessListener processListener) {
+        this.processListener = processListener;
+        return this;
+    }
+
+    /**
      * Provides information about the actual FFmpeg version.
      *
      * @return An object containing version information.
@@ -411,7 +425,8 @@ public class FFmpeg {
         return new ProcessRunner<>(executable,
                 List.of("-version"),
                 Collections.emptyList(),
-                new VersionInfoProcessHandler())
+                new VersionInfoProcessHandler(),
+                processListener)
                 .executeAsync()
                 .get();
     }
@@ -457,7 +472,8 @@ public class FFmpeg {
         return new ProcessRunner<>(executable,
                 buildArguments(),
                 helpers,
-                new FFmpegProcessHandler(outputListener))
+                new FFmpegProcessHandler(outputListener),
+                processListener)
                 .executeAsync();
     }
 

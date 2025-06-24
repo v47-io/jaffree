@@ -21,6 +21,7 @@ import com.zaxxer.nuprocess.NuProcess
 import org.slf4j.LoggerFactory
 
 private val logger = LoggerFactory.getLogger(ProcessAccess::class.java)!!
+private const val NO_PROCESS_SET = "[%s] No process set, %s"
 
 internal class ProcessAccessImpl(
     override val commandLine: String,
@@ -28,14 +29,18 @@ internal class ProcessAccessImpl(
 ) : ProcessAccess {
     internal var process: NuProcess? = null
 
-    override val pid: Int
-        get() = process?.pid ?: error("[$execTag] process not set, can't retrieve PID")
+    private var _pid: Int? = null
+    override var pid: Int
+        set(value) {
+            _pid = value
+        }
+        get() = _pid ?: error("[$execTag] process not set, can't retrieve PID")
 
     override fun stopForcefully() {
         val process = process
 
         if (process == null)
-            logger.error("[{}] No process set, can't stop", execTag)
+            logger.error(NO_PROCESS_SET.format(execTag, "can't stop"))
         else if (process.isRunning)
             process.destroy(true)
     }
@@ -44,7 +49,7 @@ internal class ProcessAccessImpl(
         val process = process
 
         if (process == null)
-            logger.error("[{}] No process set, can't stop", execTag)
+            logger.error(NO_PROCESS_SET.format(execTag, "can't stop"))
         else if (process.isRunning)
         // wantWrite will lead to onStdinReady of the DelegatingProcessHandler to be called.
         // Hopefully the implementation is sound and never calls this anywhere else.

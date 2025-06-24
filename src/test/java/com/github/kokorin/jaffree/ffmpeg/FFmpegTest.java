@@ -10,7 +10,10 @@ import com.github.kokorin.jaffree.ffprobe.FFprobeResult;
 import com.github.kokorin.jaffree.ffprobe.Stream;
 import com.github.kokorin.jaffree.process.JaffreeAbnormalExitException;
 import com.github.kokorin.jaffree.process.ProcessHelper;
+import io.v47.jaffree.process.ProcessAccess;
 import io.v47.jaffree.process.ProcessFuture;
+import io.v47.jaffree.process.ProcessListener;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Disabled;
@@ -927,5 +930,36 @@ public class FFmpegTest {
         result.get();
 
         assertTrue(result.isCancelled());
+    }
+
+    @Test
+    public void testProcessListener() throws Exception {
+        Path tempDir = Files.createTempDirectory("jaffree");
+        Path outputPath = tempDir.resolve(Artifacts.VIDEO_MP4.getFileName());
+
+        final AtomicReference<ProcessAccess> processAccessMut = new AtomicReference<>();
+        final AtomicBoolean onStopCalled = new AtomicBoolean(false);
+        ProcessListener listener = new ProcessListener() {
+            @Override
+            public void onStart(@NotNull ProcessAccess processAccess) {
+                processAccessMut.set(processAccess);
+            }
+
+            @Override
+            public void onStop(@NotNull ProcessAccess processAccess, int exitCode) {
+                onStopCalled.set(true);
+            }
+        };
+
+        ProcessFuture<FFmpegResult> result = FFmpeg.atPath(Config.FFMPEG_BIN)
+                .addInput(UrlInput.fromPath(Artifacts.VIDEO_FLV))
+                .addOutput(UrlOutput.toPath(outputPath))
+                .setProcessListener(listener)
+                .executeAsync();
+
+        result.get();
+
+        assertEquals(processAccessMut.get(), result.getProcessAccess());
+        assertTrue(onStopCalled.get());
     }
 }

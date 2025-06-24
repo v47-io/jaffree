@@ -32,7 +32,8 @@ internal class ProcessRunner<T>(
     private val executable: Path,
     private val arguments: List<String>,
     private val helpers: List<Runnable>,
-    private val processHandler: JaffreeProcessHandler<T>
+    private val processHandler: JaffreeProcessHandler<T>,
+    private val processListener: ProcessListener?
 ) {
     @Suppress("LongMethod", "ThrowsCount")
     @Synchronized
@@ -74,7 +75,12 @@ internal class ProcessRunner<T>(
 
                 logger.info("[{}] Starting process: {}", execTag, executable)
 
-                val actualProcessHandler = DelegatingProcessHandler(processHandler)
+                val actualProcessHandler =
+                    DelegatingProcessHandler(
+                        processHandler,
+                        processAccess,
+                        processListener
+                    )
 
                 val nuProcessBuilder = NuProcessBuilder(actualProcessHandler, command)
                 nuProcessBuilder.environment()["AV_LOG_FORCE_NOCOLOR"] = "1"

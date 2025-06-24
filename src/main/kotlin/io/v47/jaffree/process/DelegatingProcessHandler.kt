@@ -21,7 +21,9 @@ import java.nio.ByteBuffer
 
 internal class DelegatingProcessHandler(
     private val delegate: JaffreeProcessHandler<*>,
-) : DefaultProcessHandler() {
+    processAccess: ProcessAccess,
+    processListener: ProcessListener? = null
+) : DefaultProcessHandler(processAccess, processListener) {
     override fun onStdout(buffer: ByteBuffer, closed: Boolean) {
         delegate.onStdout(buffer, closed)
     }

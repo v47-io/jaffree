@@ -39,6 +39,7 @@ import com.github.kokorin.jaffree.ffprobe.data.FormatParser;
 import com.github.kokorin.jaffree.ffprobe.data.JsonFormatParser;
 import io.v47.jaffree.ffprobe.FFprobeProcessHandler;
 import io.v47.jaffree.process.ProcessFuture;
+import io.v47.jaffree.process.ProcessListener;
 import io.v47.jaffree.process.ProcessRunner;
 
 import java.io.InputStream;
@@ -76,6 +77,7 @@ public class FFprobe {
     private Long analyzeDuration;
     private Long fpsProbeSize;
 
+    private ProcessListener processListener;
     private final List<String> additionalArguments = new ArrayList<>();
 
     private String format;
@@ -517,6 +519,18 @@ public class FFprobe {
     }
 
     /**
+     * Sets a process listener that can be used to access the ProcessAccess instance
+     * before it can be retrieved from a ProcessFuture.
+     *
+     * @param processListener process listener
+     * @return this
+     */
+    public FFprobe setProcessListener(final ProcessListener processListener) {
+        this.processListener = processListener;
+        return this;
+    }
+
+    /**
      * Starts synchronous ffprobe execution.
      * <p>
      * Current thread is blocked until ffprobe is finished.
@@ -544,7 +558,8 @@ public class FFprobe {
         return new ProcessRunner<>(executable,
                 buildArguments(),
                 helpers,
-                new FFprobeProcessHandler(formatParser))
+                new FFprobeProcessHandler(formatParser),
+                processListener)
                 .executeAsync();
     }
 

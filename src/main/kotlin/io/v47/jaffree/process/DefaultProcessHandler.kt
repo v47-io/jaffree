@@ -21,10 +21,20 @@ import com.zaxxer.nuprocess.NuProcess
 import com.zaxxer.nuprocess.NuProcessHandler
 import java.nio.ByteBuffer
 
-internal open class DefaultProcessHandler : NuProcessHandler {
+internal open class DefaultProcessHandler(
+    private val processAccess: ProcessAccess,
+    private val processListener: ProcessListener? = null,
+) : NuProcessHandler {
     override fun onPreStart(nuProcess: NuProcess) = Unit
-    override fun onStart(nuProcess: NuProcess) = Unit
-    override fun onExit(exitCode: Int) = Unit
+    override fun onStart(nuProcess: NuProcess) {
+        (processAccess as ProcessAccessImpl).pid = nuProcess.pid
+        processListener?.onStartSafe(processAccess)
+    }
+
+    override fun onExit(exitCode: Int) {
+        processListener?.onStopSafe(processAccess, exitCode)
+    }
+
     override fun onStdout(buffer: ByteBuffer, closed: Boolean) = Unit
     override fun onStderr(buffer: ByteBuffer, closed: Boolean) = Unit
     override fun onStdinReady(buffer: ByteBuffer): Boolean = false
