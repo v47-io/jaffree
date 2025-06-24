@@ -12,6 +12,11 @@ video production and consumption (with transparency)
 
 It integrates with ffmpeg via [NuProcess][nuprocess].
 
+> Note: If you are using any JDK >= 21 in an environment where JNA isn't available (e.g. GraalVM 
+> native image), simply plug in [nuprocess-shim][nuprocess-shim] and exclude `com.zaxxer:nuprocess`.
+
+[nuprocess-shim]: https://github.com/v47-io/nuprocess-shim
+
 [nuprocess]: https://github.com/brettwooldridge/NuProcess
 
 ## Usage
