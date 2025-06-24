@@ -18,7 +18,6 @@ package io.v47.jaffree.process
 
 import com.github.kokorin.jaffree.JaffreeException
 import com.github.kokorin.jaffree.process.JaffreeAbnormalExitException
-import java.util.concurrent.CancellationException
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.CompletionStage
 import java.util.concurrent.ExecutionException
@@ -309,4 +308,3 @@ private class ProcessFutureImpl<T>(
     override fun toCompletableFuture(): CompletableFuture<T> =
         delegate.toCompletableFuture()
 }
-

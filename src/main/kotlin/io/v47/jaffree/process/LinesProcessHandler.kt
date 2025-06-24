@@ -20,14 +20,11 @@ import com.github.kokorin.jaffree.LogLevel
 import com.github.kokorin.jaffree.log.LogMessage
 import org.slf4j.Logger
 import java.nio.ByteBuffer
-import java.util.concurrent.CompletableFuture
 
 private const val CARRIAGE_RETURN = '\r'.code.toByte()
 private const val NEWLINE = '\n'.code.toByte()
 
 internal abstract class LinesProcessHandler<R> : JaffreeProcessHandler<R> {
-    private val result = CompletableFuture<R>()
-
     override val errorLogMessages = mutableListOf<LogMessage>()
 
     private val currentStderrBytes = mutableListOf<ByteArray>()
@@ -46,7 +43,7 @@ internal abstract class LinesProcessHandler<R> : JaffreeProcessHandler<R> {
             }
         }
 
-        if (closed && currentStderrBytes.size > 0)
+        if (closed && currentStderrBytes.isNotEmpty())
             onStderrLine(String(currentStderrBytes.join()))
     }
 
